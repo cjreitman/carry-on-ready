@@ -597,7 +597,7 @@ export default function Build() {
                 />
               </Field>
               <Field>
-                Climate override (optional)
+                Climate
                 <Select
                   value={s.climateOverride}
                   onChange={(e) =>
