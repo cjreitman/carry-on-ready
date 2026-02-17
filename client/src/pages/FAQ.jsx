@@ -21,7 +21,7 @@ const Answer = styled.p`
 
 const faqs = [
   {
-    q: 'What does CarryOn Ready do?',
+    q: 'What does Carry-On Ready do?',
     a: 'It generates a packing checklist tailored to your trip length, climate, work setup, and bag size — optimized for carry-on-only travel.',
   },
   {

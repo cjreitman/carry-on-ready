@@ -76,7 +76,7 @@ module.exports = function clothingRule(ctx, draft) {
     draft.notes.push('Tip: merino base layers add warmth without bulk.');
   }
 
-  if (climate === 'rainy' || climate === 'mixed') {
+  if (derived.rainExpected || climate === 'rainy' || climate === 'mixed') {
     draft.clothingCounts.outerwear += 1;
     draft.items.push({
       id: 'clothing-rain-shell',

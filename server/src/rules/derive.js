@@ -38,6 +38,10 @@ function computeDerived(input) {
     ? input.schengenDaysUsedLast180 + schengenDaysThisTrip
     : null;
 
+  const rainExpected =
+    input.climateOverall === 'rainy' ||
+    input.stops.some((s) => s.rainExpected === true);
+
   return {
     stopDaysList,
     totalDays,
@@ -49,6 +53,7 @@ function computeDerived(input) {
     climate: input.climateOverall,
     laundry: input.laundry,
     workSetup: input.workSetup,
+    rainExpected,
   };
 }
 

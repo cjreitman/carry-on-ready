@@ -5,6 +5,7 @@ const stopSchema = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
   climateOverride: z.enum(['cold', 'moderate', 'hot', 'mixed', 'rainy']).nullable().optional(),
+  rainExpected: z.boolean().optional(),
 });
 
 const generateInputSchema = z.object({

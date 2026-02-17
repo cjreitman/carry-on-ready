@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const connectDB = require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -11,13 +12,26 @@ app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
 const generateRouter = require('./routes/generate');
+const stripeRouter = require('./routes/stripe');
+const proRouter = require('./routes/pro');
+const plansRouter = require('./routes/plans');
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
 app.use('/api/generate', generateRouter);
+app.use('/api/stripe', stripeRouter);
+app.use('/api/pro', proRouter);
+app.use('/api/plans', plansRouter);
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Graceful shutdown so nodemon can restart without EADDRINUSE
+process.on('SIGTERM', () => server.close());
+process.on('SIGINT', () => server.close());
+
+// Connect to MongoDB in background — plans routes need it, generate does not
+connectDB();

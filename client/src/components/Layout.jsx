@@ -1,5 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import styled from 'styled-components';
+import usePro from '../context/ProContext';
+import { useThemeMode } from '../App';
 
 const Nav = styled.nav`
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
@@ -25,6 +27,20 @@ const NavLinks = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing.lg};
   font-size: 0.95rem;
+  align-items: center;
+`;
+
+const ThemeToggle = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  padding: 2px 4px;
+  line-height: 1;
+  color: ${({ theme }) => theme.colors.textLight};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.text};
+  }
 `;
 
 const Main = styled.main`
@@ -43,21 +59,28 @@ const Footer = styled.footer`
 `;
 
 export default function Layout() {
+  const { isPro } = usePro();
+  const { mode, toggle } = useThemeMode();
+
   return (
     <>
       <Nav>
         <NavInner>
-          <Logo to="/">CarryOn Ready</Logo>
+          <Logo to="/">Carry-On Ready</Logo>
           <NavLinks>
             <Link to="/build">Build</Link>
+            {isPro && <Link to="/plans">Plans</Link>}
             <Link to="/faq">FAQ</Link>
+            <ThemeToggle onClick={toggle} title="Toggle theme">
+              {mode === 'light' ? '\u{1F319}' : '\u{2600}\u{FE0F}'}
+            </ThemeToggle>
           </NavLinks>
         </NavInner>
       </Nav>
       <Main>
         <Outlet />
       </Main>
-      <Footer>CarryOn Ready</Footer>
+      <Footer>Carry-On Ready</Footer>
     </>
   );
 }
