@@ -56,6 +56,10 @@ const Footer = styled.footer`
   text-align: center;
   font-size: 0.85rem;
   color: ${({ theme }) => theme.colors.textLight};
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
 `;
 
 export default function Layout() {
@@ -80,7 +84,11 @@ export default function Layout() {
       <Main>
         <Outlet />
       </Main>
-      <Footer>Carry-On Ready</Footer>
+      <Footer>
+          <span>Carry-On Ready</span>
+          <Link to="/legal">Legal</Link>
+          <Link to="/legal#contact">Contact</Link>
+        </Footer>
     </>
   );
 }
