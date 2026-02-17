@@ -16,6 +16,7 @@ const generateInputSchema = z.object({
   workSetup: z.enum(['none', 'light', 'heavy']),
   passportRegion: z.enum(['US', 'EU', 'UK', 'other']),
   schengenDaysUsedLast180: z.number().int().min(0).max(90),
+  mustBringItems: z.array(z.string().min(1)).optional(),
 });
 
 function validate(schema) {

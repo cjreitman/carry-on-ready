@@ -76,7 +76,20 @@ function generate(rawInput) {
     }
   }
 
-  // 6. Oversize warning
+  // 6. Must-bring items (after caps, prepended so they appear first)
+  if (parsed.mustBringItems && parsed.mustBringItems.length > 0) {
+    const mustBring = parsed.mustBringItems.map((label) => ({
+      id: 'must-' + label.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      section: 'Must-bring',
+      label,
+      count: 1,
+      packed: false,
+      isUserRequired: true,
+    }));
+    draft.items.unshift(...mustBring);
+  }
+
+  // 7. Oversize warning
   if (derived.bagTier === 'OVERSIZE') {
     draft.warnings.push(
       `Your bag (${parsed.bagLiters}L) may exceed carry-on limits on some airlines. Check your airline's policy.`
