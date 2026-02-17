@@ -1,0 +1,21 @@
+{
+  "name": "carryonready-server",
+  "private": true,
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.8.0",
+    "stripe": "^17.5.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
