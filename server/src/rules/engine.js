@@ -56,6 +56,9 @@ const OPTIONAL_ADDONS = [
   { id: 'opt-sunglasses-case', label: 'Sunglasses (hard case)', tooltip: '~0.15L. Protects lenses in a packed bag.' },
   { id: 'opt-shaver', label: 'Electric shaver / trimmer', tooltip: '~0.25L. USB-rechargeable, saves space over razors.' },
   { id: 'opt-makeup', label: 'Makeup kit (travel size)', tooltip: '~0.5L. Decant into small containers to save space.' },
+  { id: 'opt-lock', label: 'TSA-approved luggage lock', tooltip: '~0.05L. Secures your bag at hostels and airports.' },
+  { id: 'opt-detergent', label: 'Detergent sheets / travel soap', tooltip: '~0.1L. Enables sink washes on long trips.' },
+  { id: 'opt-mouse', label: 'Travel mouse', tooltip: '~0.2L. Helpful for heavy laptop work sessions.' },
 ];
 
 const CARRYON_PRINCIPLES = [
@@ -113,13 +116,15 @@ function generate(rawInput) {
 
     for (const { key, label } of clothingItems) {
       if (capped[key] > 0) {
-        draft.items.unshift({
+        const item = {
           id: `clothing-${key}`,
           section: 'Clothing',
           label,
           count: capped[key],
           packed: false,
-        });
+        };
+        if (key === 'shoes') item.wearOne = true;
+        draft.items.unshift(item);
       }
     }
   }
@@ -144,19 +149,7 @@ function generate(rawInput) {
     );
   }
 
-  // 7. Schengen warnings
-  if (derived.schengenApplies) {
-    if (derived.estimatedSchengenTotal > 90) {
-      draft.warnings.push(
-        `Schengen alert: estimated ${derived.estimatedSchengenTotal} of 90 days used. You may exceed the 90/180 Schengen rule. Consider adjusting your itinerary.`
-      );
-    }
-    draft.notes.push(
-      `Schengen 90/180 estimator: ${parsed.schengenDaysUsedLast180} prior days + ${derived.schengenDaysThisTrip} this trip = ${derived.estimatedSchengenTotal} days. Informational only, not legal advice.`
-    );
-  }
-
-  // 8. Minimum clothing guidance
+  // 7. Minimum clothing guidance
   draft.notes.push(
     'Minimum viable rotation: 3 shirts / socks / underwear. 5 is preferred.'
   );
@@ -167,6 +160,14 @@ function generate(rawInput) {
 
   // 10. Attach volume metadata to every item
   const checklist = draft.items.map(attachVolume);
+
+  // 10b. Must-bring items: null out volume (user-supplied, unknown size)
+  for (const item of checklist) {
+    if (item.isUserRequired) {
+      item.volumeEachLiters = null;
+      item.volumeSource = null;
+    }
+  }
 
   // 11. Inject baseline essential items (skip duplicates by ID)
   const existingIds = new Set(checklist.map((item) => item.id));
@@ -201,10 +202,6 @@ function generate(rawInput) {
     derived: {
       totalDays: derived.totalDays,
       bagTier: derived.bagTier,
-      hasSchengenStop: derived.hasSchengenStop,
-      schengenApplies: derived.schengenApplies,
-      schengenDaysThisTrip: derived.schengenDaysThisTrip,
-      estimatedSchengenTotal: derived.estimatedSchengenTotal,
       ...volumeDerived,
     },
     rulesVersion: RULES_VERSION,

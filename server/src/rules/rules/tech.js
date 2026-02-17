@@ -19,7 +19,6 @@ module.exports = function techRule(ctx, draft) {
   if (workSetup === 'heavy') {
     draft.items.push(
       { id: 'tech-laptop', section: 'Tech', label: 'Laptop + charger', count: 1, packed: false },
-      { id: 'tech-mouse', section: 'Tech', label: 'Travel mouse', count: 1, packed: false },
       { id: 'tech-hub', section: 'Tech', label: 'USB-C hub / dongle', count: 1, packed: false }
     );
   }

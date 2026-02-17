@@ -41,13 +41,6 @@ module.exports = function clothingRule(ctx, draft) {
       draft.notes.push(
         'No laundry access for 7+ days: pack detergent sheets and plan sink washes.'
       );
-      draft.items.push({
-        id: 'clothing-detergent',
-        section: 'Clothing',
-        label: 'Detergent sheets / travel soap',
-        count: 1,
-        packed: false,
-      });
     }
   }
 

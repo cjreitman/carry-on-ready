@@ -15,8 +15,6 @@ const generateInputSchema = z.object({
   laundry: z.enum(['none', 'weekly', 'frequent']),
   workSetup: z.enum(['none', 'light', 'heavy']),
   gender: z.enum(['male', 'female', 'non-binary', 'prefer-not-to-say']),
-  passportRegion: z.enum(['US', 'EU', 'UK', 'other']),
-  schengenDaysUsedLast180: z.number().int().min(0).max(90),
   mustBringItems: z.array(z.string().min(1)).optional(),
 });
 

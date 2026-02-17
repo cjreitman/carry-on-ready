@@ -27,8 +27,40 @@ const ITEM_TOOLTIPS = {
 // --- Styled pieces ---
 
 const Page = styled.div`
-  max-width: 720px;
+  max-width: 1100px;
   margin: 0 auto;
+`;
+
+const PageWrap = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing.lg};
+  align-items: flex-start;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const MainContent = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const SidePanel = styled.div`
+  width: 300px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 20px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    position: static;
+  }
+
+  @media print {
+    position: static;
+    width: 100%;
+  }
 `;
 
 const Header = styled.div`
@@ -91,6 +123,24 @@ const SummaryNote = styled.p`
   font-size: 0.8rem;
   color: ${({ theme }) => theme.colors.textLight};
   margin-bottom: ${({ theme }) => theme.spacing.lg};
+`;
+
+const BagSizeInput = styled.input`
+  width: 52px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 2px 4px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 4px;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text};
+  background: ${({ theme }) => theme.colors.bg};
+  margin-right: 5px;
+
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.primary};
+    outline: none;
+  }
 `;
 
 // --- Capacity bar ---
@@ -301,6 +351,25 @@ const VolumeHint = styled.span`
   color: ${({ theme }) => theme.colors.textLight};
   flex-shrink: 0;
   white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary};
+  }
+
+  @media print {
+    display: none;
+  }
+`;
+
+const VolumeInput = styled.input`
+  width: 48px;
+  font-size: 0.7rem;
+  padding: 1px 4px;
+  border: 1px solid ${({ theme }) => theme.colors.primary};
+  border-radius: 3px;
+  outline: none;
+  flex-shrink: 0;
 
   @media print {
     display: none;
@@ -474,10 +543,13 @@ const LowCountWarn = styled.span`
 
 // --- Subcomponents ---
 
-function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip, highlighted }) {
+function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, onEditVolume, tooltip, highlighted }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(item.label);
+  const [editingVol, setEditingVol] = useState(false);
+  const [volDraft, setVolDraft] = useState('');
   const inputRef = useRef(null);
+  const volInputRef = useRef(null);
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -485,6 +557,13 @@ function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip, h
       inputRef.current.select();
     }
   }, [editing]);
+
+  useEffect(() => {
+    if (editingVol && volInputRef.current) {
+      volInputRef.current.focus();
+      volInputRef.current.select();
+    }
+  }, [editingVol]);
 
   function commitEdit() {
     const trimmed = draft.trim();
@@ -505,9 +584,38 @@ function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip, h
     }
   }
 
+  function startVolEdit() {
+    setVolDraft(item.volumeEachLiters != null ? String(item.volumeEachLiters) : '');
+    setEditingVol(true);
+  }
+
+  function commitVolEdit() {
+    const trimmed = volDraft.trim();
+    if (trimmed === '') {
+      onEditVolume(item.id, '');
+    } else {
+      const parsed = parseFloat(trimmed);
+      if (Number.isNaN(parsed)) {
+        // NaN → cancel, revert
+      } else {
+        onEditVolume(item.id, trimmed);
+      }
+    }
+    setEditingVol(false);
+  }
+
+  function handleVolKeyDown(e) {
+    if (e.key === 'Enter') {
+      commitVolEdit();
+    } else if (e.key === 'Escape') {
+      setEditingVol(false);
+    }
+  }
+
   const count = item.count ?? 1;
-  const volEach = item.volumeEachLiters ?? 0.2;
-  const volTotal = +(volEach * count).toFixed(1);
+  const effectiveCount = item.wearOne ? Math.max(0, count - 1) : count;
+  const volEach = item.volumeEachLiters;
+  const volTotal = volEach != null ? +(volEach * effectiveCount).toFixed(1) : null;
 
   const LOW_COUNT_IDS = new Set(['clothing-underwear', 'clothing-socks', 'clothing-shirts']);
   const showLowWarn = LOW_COUNT_IDS.has(item.id) && count > 0 && count < 3;
@@ -536,9 +644,23 @@ function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip, h
           {tooltip && <InfoTooltip text={tooltip} />}
         </LabelText>
       )}
-      <VolumeHint title={`Volume source: ${item.volumeSource || 'default'}`}>
-        {volTotal}L
-      </VolumeHint>
+      {editingVol ? (
+        <VolumeInput
+          ref={volInputRef}
+          value={volDraft}
+          onChange={(e) => setVolDraft(e.target.value)}
+          onBlur={commitVolEdit}
+          onKeyDown={handleVolKeyDown}
+          placeholder="L"
+        />
+      ) : (
+        <VolumeHint
+          onClick={startVolEdit}
+          title={volTotal != null ? `Volume source: ${item.volumeSource || 'default'} — click to edit` : 'Volume unknown — click to set'}
+        >
+          {volTotal != null ? `${volTotal}L` : '?'}
+        </VolumeHint>
+      )}
       <CountStepperWrap>
         <StepButton
           aria-label="Decrease count"
@@ -597,6 +719,14 @@ function AddItemRow({ section, onAdd }) {
 
 // --- Helpers ---
 
+function getBagTier(liters) {
+  if (liters <= 25) return 'ULTRA';
+  if (liters <= 34) return 'TIGHT';
+  if (liters <= 40) return 'STANDARD';
+  if (liters <= 45) return 'MAX';
+  return 'OVERSIZE';
+}
+
 function groupBySection(items) {
   const groups = {};
   for (const item of items) {
@@ -628,7 +758,7 @@ export default function Results() {
   const result = location.state?.result;
   const inputs = location.state?.inputs;
 
-  const { items, togglePacked, editLabel, removeItem, addItem, addFullItem, setCount, totalVolume } = useChecklist(
+  const { items, togglePacked, editLabel, removeItem, addItem, addFullItem, setCount, editVolume, totalVolume } = useChecklist(
     result?.checklist
   );
 
@@ -636,6 +766,7 @@ export default function Results() {
   const [saved, setSaved] = useState(false);
   const [addOnsExpanded, setAddOnsExpanded] = useState(true);
   const [optionalAddOns] = useState(() => result?.optionalAddOns || []);
+  const [localBagLiters, setLocalBagLiters] = useState(() => inputs?.bagLiters || 35);
 
   // Derive which add-on IDs are already in the checklist
   const checklistIds = useMemo(() => new Set(items.map((i) => i.id)), [items]);
@@ -646,7 +777,7 @@ export default function Results() {
   );
 
   // Volume / capacity derived values
-  const usableCapacity = result ? +(result.derived?.usableCapacityLiters || (inputs?.bagLiters * 0.85)).toFixed(1) : 0;
+  const usableCapacity = +(localBagLiters * 0.85).toFixed(1);
   const percentUsed = usableCapacity > 0 ? Math.round((totalVolume / usableCapacity) * 100) : 0;
   const capacityState = percentUsed > 100 ? 'danger' : percentUsed >= 90 ? 'warning' : 'normal';
   const overBy = capacityState === 'danger' ? +(totalVolume - usableCapacity).toFixed(1) : 0;
@@ -655,11 +786,15 @@ export default function Results() {
   const highlightIds = useMemo(() => {
     if (capacityState !== 'danger') return new Set();
     const sorted = [...items]
-      .map((it) => ({
-        id: it.id,
-        vol: (it.volumeEachLiters ?? 0.2) * (it.count ?? 1),
-        isUser: !!it.isUserAdded,
-      }))
+      .map((it) => {
+        const c = it.count ?? 1;
+        const ec = it.wearOne ? Math.max(0, c - 1) : c;
+        return {
+          id: it.id,
+          vol: (it.volumeEachLiters != null ? it.volumeEachLiters : 0) * ec,
+          isUser: !!it.isUserAdded,
+        };
+      })
       .sort((a, b) => b.vol - a.vol);
     const ids = new Set();
     // Always highlight user-added items
@@ -733,8 +868,7 @@ export default function Results() {
   const rawTips = principleIdx >= 0 ? notes.slice(0, principleIdx) : notes;
   const principleNotes =
     principleIdx >= 0 ? notes.slice(principleIdx + 1) : [];
-  const schengenEstLine = rawTips.find((n) => n.startsWith('Schengen 90/180'));
-  const tipNotes = rawTips.filter((n) => !n.startsWith('Schengen 90/180'));
+  const tipNotes = rawTips;
 
   return (
     <Page>
@@ -750,133 +884,143 @@ export default function Results() {
         </ExportBar>
       </Header>
 
-      {/* Summary */}
-      <SummaryBar>
-        <SummaryItem>
-          Bag: <strong>{inputs?.bagLiters}L</strong> ({derived.bagTier})
-        </SummaryItem>
-        <SummaryItem>
-          Trip: <strong>{derived.totalDays} days</strong>
-        </SummaryItem>
-        {derived.schengenApplies && derived.estimatedSchengenTotal != null && (
-          <SummaryItem>
-            Schengen usage:{' '}
-            <strong>{derived.estimatedSchengenTotal} / 90 days</strong> (est.)
-          </SummaryItem>
-        )}
-      </SummaryBar>
-      <SummaryNote>Counts already capped for your bag tier.</SummaryNote>
-
-      {/* Capacity bar */}
-      <CapacityWrap>
-        <CapacityLabel $state={capacityState}>
-          <span>Estimated pack volume</span>
-          <strong>
-            {totalVolume}L / {usableCapacity}L usable ({percentUsed}%)
-          </strong>
-        </CapacityLabel>
-        <CapacityTrack>
-          <CapacityFill $pct={percentUsed} $state={capacityState} />
-        </CapacityTrack>
-        {capacityState === 'danger' && (
-          <CapacityHint $state="danger">
-            Over by {overBy}L — consider removing or reducing high-volume items highlighted below.
-          </CapacityHint>
-        )}
-        {capacityState === 'warning' && (
-          <CapacityHint $state="warning">
-            Getting tight — you may want to slim down a few items.
-          </CapacityHint>
-        )}
-      </CapacityWrap>
-
-      {/* Warnings */}
-      {warnings.map((w, i) => (
-        <WarningBox key={i}>{w}</WarningBox>
-      ))}
-
-      {/* Checklist sections */}
-      {sectionOrder.map((sectionName) => {
-        const sectionItems = sections[sectionName] || [];
-        return (
-          <Section key={sectionName} data-print-section>
-            <SectionTitle>{sectionName}</SectionTitle>
-            {sectionItems.length === 0 ? (
-              <EmptySection>No items</EmptySection>
-            ) : (
-              sectionItems.map((item) => (
-                <EditableItem
-                  key={item.id}
-                  item={item}
-                  onToggle={togglePacked}
-                  onEdit={editLabel}
-                  onRemove={removeItem}
-                  onSetCount={setCount}
-                  tooltip={ITEM_TOOLTIPS[item.id]}
-                  highlighted={highlightIds.has(item.id)}
-                />
-              ))
-            )}
-            <AddItemRow section={sectionName} onAdd={addItem} />
-          </Section>
-        );
-      })}
-
-      {/* Optional Add-ons */}
-      {optionalAddOns.length > 0 && (
-        <Section>
-          <AddOnSectionHeader>
-            <SectionTitle style={{ marginBottom: 0 }}>Optional Add-ons</SectionTitle>
-            <AddOnToggle onClick={() => setAddOnsExpanded((v) => !v)}>
-              {addOnsExpanded ? 'Hide' : 'Show'}
-            </AddOnToggle>
-          </AddOnSectionHeader>
-          {addOnsExpanded &&
-            optionalAddOns.map((addon) => {
-              const added = checklistIds.has(addon.id);
-              return (
-                <AddOnRow key={addon.id}>
-                  <AddOnLabel>
-                    {addon.label}
-                    {addon.tooltip && <InfoTooltip text={addon.tooltip} />}
-                  </AddOnLabel>
-                  <VolumeHint>{addon.volumeEachLiters}L</VolumeHint>
-                  <AddOnBtn
-                    $added={added}
-                    disabled={added}
-                    onClick={() => handleAddOn(addon)}
-                  >
-                    {added ? 'Added' : 'Add'}
-                  </AddOnBtn>
-                </AddOnRow>
-              );
-            })}
-        </Section>
-      )}
-
-      {/* Tips / notes */}
-      {tipNotes.length > 0 && (
-        <NoteBox>
-          <NoteList>
-            {tipNotes.map((n, i) => (
-              <NoteListItem key={i}>{n}</NoteListItem>
-            ))}
-          </NoteList>
-        </NoteBox>
-      )}
-      {schengenEstLine && <NoteFooter>{schengenEstLine}</NoteFooter>}
-
-      {/* Carry-on Principles */}
-      {principleNotes.length > 0 && (
-        <Section style={{ marginTop: '8px' }} data-print-section>
-          <SectionTitle>Carry-On Principles</SectionTitle>
-          {principleNotes.map((n, i) => (
-            <PrincipleItem key={i} data-print-row>{n}</PrincipleItem>
+      <PageWrap>
+        {/* --- Main content (left) --- */}
+        <MainContent>
+          {/* Warnings */}
+          {warnings.map((w, i) => (
+            <WarningBox key={i}>{w}</WarningBox>
           ))}
-        </Section>
-      )}
 
-      <BackLink to="/build" data-print-hide>&larr; Back to Build</BackLink>
+          {/* Checklist sections */}
+          {sectionOrder.map((sectionName) => {
+            const sectionItems = sections[sectionName] || [];
+            return (
+              <Section key={sectionName} data-print-section>
+                <SectionTitle>{sectionName}</SectionTitle>
+                {sectionItems.length === 0 ? (
+                  <EmptySection>No items</EmptySection>
+                ) : (
+                  sectionItems.map((item) => (
+                    <EditableItem
+                      key={item.id}
+                      item={item}
+                      onToggle={togglePacked}
+                      onEdit={editLabel}
+                      onRemove={removeItem}
+                      onSetCount={setCount}
+                      onEditVolume={editVolume}
+                      tooltip={ITEM_TOOLTIPS[item.id]}
+                      highlighted={highlightIds.has(item.id)}
+                    />
+                  ))
+                )}
+                <AddItemRow section={sectionName} onAdd={addItem} />
+              </Section>
+            );
+          })}
+
+          {/* Optional Add-ons */}
+          {optionalAddOns.length > 0 && (
+            <Section>
+              <AddOnSectionHeader>
+                <SectionTitle style={{ marginBottom: 0 }}>Optional Add-ons</SectionTitle>
+                <AddOnToggle onClick={() => setAddOnsExpanded((v) => !v)}>
+                  {addOnsExpanded ? 'Hide' : 'Show'}
+                </AddOnToggle>
+              </AddOnSectionHeader>
+              {addOnsExpanded &&
+                optionalAddOns.map((addon) => {
+                  const added = checklistIds.has(addon.id);
+                  return (
+                    <AddOnRow key={addon.id}>
+                      <AddOnLabel>
+                        {addon.label}
+                        {addon.tooltip && <InfoTooltip text={addon.tooltip} />}
+                      </AddOnLabel>
+                      <VolumeHint>{addon.volumeEachLiters}L</VolumeHint>
+                      <AddOnBtn
+                        $added={added}
+                        disabled={added}
+                        onClick={() => handleAddOn(addon)}
+                      >
+                        {added ? 'Added' : 'Add'}
+                      </AddOnBtn>
+                    </AddOnRow>
+                  );
+                })}
+            </Section>
+          )}
+
+          {/* Tips / notes */}
+          {tipNotes.length > 0 && (
+            <NoteBox>
+              <NoteList>
+                {tipNotes.map((n, i) => (
+                  <NoteListItem key={i}>{n}</NoteListItem>
+                ))}
+              </NoteList>
+            </NoteBox>
+          )}
+          {/* Carry-on Principles */}
+          {principleNotes.length > 0 && (
+            <Section style={{ marginTop: '8px' }} data-print-section>
+              <SectionTitle>Carry-On Principles</SectionTitle>
+              {principleNotes.map((n, i) => (
+                <PrincipleItem key={i} data-print-row>{n}</PrincipleItem>
+              ))}
+            </Section>
+          )}
+
+          <BackLink to="/build" data-print-hide>&larr; Back to Build</BackLink>
+        </MainContent>
+
+        {/* --- Side panel (right, sticky) --- */}
+        <SidePanel>
+          <SummaryBar style={{ flexDirection: 'column', gap: '8px' }}>
+            <SummaryItem>
+              Bag:{' '}
+              <BagSizeInput
+                type="number"
+                min="10"
+                max="80"
+                value={localBagLiters}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value);
+                  if (!Number.isNaN(v) && v > 0) setLocalBagLiters(v);
+                }}
+              />
+              L
+            </SummaryItem>
+            <SummaryItem>
+              Trip: <strong>{derived.totalDays} days</strong>
+            </SummaryItem>
+          </SummaryBar>
+          <SummaryNote>Adjust bag size to update capacity.</SummaryNote>
+
+          <CapacityWrap>
+            <CapacityLabel $state={capacityState}>
+              <span>Pack volume</span>
+              <strong>
+                {totalVolume}L / {usableCapacity}L ({percentUsed}%)
+              </strong>
+            </CapacityLabel>
+            <CapacityTrack>
+              <CapacityFill $pct={percentUsed} $state={capacityState} />
+            </CapacityTrack>
+            {capacityState === 'danger' && (
+              <CapacityHint $state="danger">
+                Over by {overBy}L — reduce highlighted items.
+              </CapacityHint>
+            )}
+            {capacityState === 'warning' && (
+              <CapacityHint $state="warning">
+                Getting tight — consider slimming down.
+              </CapacityHint>
+            )}
+          </CapacityWrap>
+        </SidePanel>
+      </PageWrap>
     </Page>
   );
 }

@@ -9,15 +9,5 @@ module.exports = function documentsRule(ctx, draft) {
     { id: 'docs-copies', section: 'Documents', label: 'Photo copies of key documents (phone/cloud)', count: 1, packed: false }
   );
 
-  if (ctx.derived.schengenApplies) {
-    draft.items.push({
-      id: 'docs-schengen-proof',
-      section: 'Documents',
-      label: 'Proof of accommodation / return ticket (Schengen entry)',
-      count: 1,
-      packed: false,
-    });
-  }
-
   // TODO: add visa reminders per destination
 };

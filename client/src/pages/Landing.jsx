@@ -65,7 +65,7 @@ export default function Landing() {
         trip length, climate, and work setup.
       </Subhead>
       <Supporting>
-        Optimized for 25–40L backpacks, long stays, and Schengen-aware travel.
+        Optimized for 25–40L backpacks and long stays.
       </Supporting>
       <CTA to="/build">Generate My Carry-On Plan</CTA>
       <HelperText>No account required. Takes 60 seconds.</HelperText>

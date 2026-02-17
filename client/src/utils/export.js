@@ -17,9 +17,6 @@ export function formatChecklistText(items, derived, inputs, notes) {
   lines.push('Carry-On Ready — Packing List');
   lines.push(`Bag: ${inputs?.bagLiters}L (${derived.bagTier})`);
   lines.push(`Trip: ${derived.totalDays} days`);
-  if (derived.schengenApplies && derived.estimatedSchengenTotal != null) {
-    lines.push(`Schengen usage: ${derived.estimatedSchengenTotal} / 90 days (est.)`);
-  }
   lines.push('');
 
   const { groups, order } = groupBySection(items);

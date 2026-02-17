@@ -33,10 +33,6 @@ const faqs = [
     a: 'Most airlines allow 35–45L bags. Under 25L is ultra-light. Over 45L may exceed limits on some carriers — we\'ll warn you.',
   },
   {
-    q: 'What is the Schengen 90/180 rule?',
-    a: 'Non-EU travelers can stay up to 90 days within any 180-day period in the Schengen Area. We show an estimate based on your itinerary, but this is informational only — not legal advice.',
-  },
-  {
     q: 'What does Pro unlock?',
     a: 'Pro is a one-time $9 purchase. It lets you save plans, view them later, and export your checklist (copy, print, or PDF).',
   },

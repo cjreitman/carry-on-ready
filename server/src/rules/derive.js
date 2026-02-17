@@ -1,5 +1,3 @@
-const { isSchengenCountry, computeSchengenDays } = require('./schengen');
-
 function inclusiveDays(stop) {
   const start = new Date(stop.startDate + 'T00:00:00');
   const end = new Date(stop.endDate + 'T00:00:00');
@@ -25,19 +23,6 @@ function computeDerived(input) {
   const totalDays = stopDaysList.reduce((sum, s) => sum + s.stopDays, 0);
   const bagTier = getBagTier(input.bagLiters);
 
-  const hasSchengenStop = input.stops.some((s) =>
-    isSchengenCountry(s.countryOrRegion)
-  );
-
-  const schengenDaysThisTrip = computeSchengenDays(input.stops, inclusiveDays);
-
-  const schengenApplies =
-    hasSchengenStop && input.passportRegion !== 'EU';
-
-  const estimatedSchengenTotal = schengenApplies
-    ? input.schengenDaysUsedLast180 + schengenDaysThisTrip
-    : null;
-
   // Infer climate: explicit climateOverall > stop overrides > default 'moderate'
   let climate;
   if (input.climateOverall) {
@@ -59,10 +44,6 @@ function computeDerived(input) {
     stopDaysList,
     totalDays,
     bagTier,
-    hasSchengenStop,
-    schengenApplies,
-    schengenDaysThisTrip,
-    estimatedSchengenTotal,
     climate,
     laundry: input.laundry,
     workSetup: input.workSetup,

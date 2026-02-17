@@ -442,7 +442,6 @@ const EMPTY_STOP = {
 const CLIMATE_OPTIONS = ['cold', 'moderate', 'hot', 'mixed'];
 const LAUNDRY_OPTIONS = ['none', 'weekly', 'frequent'];
 const WORK_OPTIONS = ['none', 'light', 'heavy'];
-const PASSPORT_OPTIONS = ['US', 'EU', 'UK', 'other'];
 const GENDER_OPTIONS = [
   { value: 'male', label: 'Male' },
   { value: 'female', label: 'Female' },
@@ -460,8 +459,6 @@ export default function Build() {
 
   // Step 1 state
   const [stops, setStops] = useState([{ ...EMPTY_STOP }]);
-  const [passportRegion, setPassportRegion] = useState('US');
-  const [schengenDays, setSchengenDays] = useState(0);
   const [gender, setGender] = useState('');
   const [mustBringItems, setMustBringItems] = useState([]);
 
@@ -554,8 +551,6 @@ export default function Build() {
       laundry,
       workSetup,
       gender,
-      passportRegion,
-      schengenDaysUsedLast180: Number(schengenDays),
       mustBringItems: mustBringItems.length > 0 ? mustBringItems : undefined,
     };
 
@@ -652,34 +647,6 @@ export default function Build() {
         ))}
 
         <TextBtn onClick={addStop}>+ Add another stop</TextBtn>
-
-        <Card style={{ marginTop: '16px' }}>
-          <Row>
-            <Field>
-              Passport Region
-              <Select
-                value={passportRegion}
-                onChange={(e) => setPassportRegion(e.target.value)}
-              >
-                {PASSPORT_OPTIONS.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field>
-              Schengen Days Used (last 180 days)
-              <Input
-                type="number"
-                min={0}
-                max={90}
-                value={schengenDays}
-                onChange={(e) => setSchengenDays(e.target.value)}
-              />
-            </Field>
-          </Row>
-        </Card>
 
         <Card style={{ marginTop: '16px' }}>
           <CardLabel>Gender</CardLabel>

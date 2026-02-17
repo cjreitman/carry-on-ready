@@ -138,7 +138,6 @@ const ITEM_VOLUME_MAP = {
   'docs-boarding': 'DEFAULT_UNKNOWN_ITEM',
   'docs-insurance': 'DEFAULT_UNKNOWN_ITEM',
   'docs-copies': 'DEFAULT_UNKNOWN_ITEM',
-  'docs-schengen-proof': 'DEFAULT_UNKNOWN_ITEM',
 
   // Financial
   'fin-cards': 'wallet',
@@ -180,6 +179,9 @@ const ITEM_VOLUME_MAP = {
   'opt-sunglasses-case': 'sunglasses_case',
   'opt-shaver': 'shaver_electric_mini',
   'opt-makeup': 'makeup_kit_travel',
+  'opt-lock': 'lock',
+  'opt-detergent': 'detergent_sheets',
+  'opt-mouse': 'DEFAULT_UNKNOWN_ITEM',
 };
 
 /**
@@ -201,7 +203,11 @@ function attachVolume(item) {
 function computeVolumeDerived(checklist, bagLiters) {
   const usableCapacityLiters = +(bagLiters * 0.85).toFixed(1);
   const estimatedPackedLiters = +checklist
-    .reduce((sum, item) => sum + (item.volumeEachLiters || 0) * (item.count || 1), 0)
+    .reduce((sum, item) => {
+      const count = item.count || 1;
+      const effectiveCount = item.wearOne ? Math.max(0, count - 1) : count;
+      return sum + (item.volumeEachLiters || 0) * effectiveCount;
+    }, 0)
     .toFixed(1);
   const estimatedPercentUsed = usableCapacityLiters > 0
     ? +(estimatedPackedLiters / usableCapacityLiters).toFixed(2)

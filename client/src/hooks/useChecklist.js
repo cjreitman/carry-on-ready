@@ -15,8 +15,11 @@ export default function useChecklist(initialItems) {
     () =>
       +items
         .reduce(
-          (sum, item) =>
-            sum + (item.volumeEachLiters ?? DEFAULT_VOLUME) * (item.count ?? 1),
+          (sum, item) => {
+            const count = item.count ?? 1;
+            const effectiveCount = item.wearOne ? Math.max(0, count - 1) : count;
+            return sum + (item.volumeEachLiters != null ? item.volumeEachLiters : 0) * effectiveCount;
+          },
           0
         )
         .toFixed(1),
@@ -70,5 +73,24 @@ export default function useChecklist(initialItems) {
     setItems((prev) => [...prev, { ...item, packed: false, isUserAdded: true }]);
   }, []);
 
-  return { items, togglePacked, editLabel, removeItem, addItem, addFullItem, setCount, totalVolume };
+  const editVolume = useCallback((id, newVolume) => {
+    // empty string → null (unknown), NaN → cancel (no-op)
+    if (newVolume === '') {
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, volumeEachLiters: null, volumeSource: 'user' } : item
+        )
+      );
+      return;
+    }
+    const parsed = parseFloat(newVolume);
+    if (Number.isNaN(parsed)) return; // cancel
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, volumeEachLiters: +parsed.toFixed(2), volumeSource: 'user' } : item
+      )
+    );
+  }, []);
+
+  return { items, togglePacked, editLabel, removeItem, addItem, addFullItem, setCount, editVolume, totalVolume };
 }
