@@ -66,5 +66,9 @@ export default function useChecklist(initialItems) {
     );
   }, []);
 
-  return { items, togglePacked, editLabel, removeItem, addItem, setCount, totalVolume };
+  const addFullItem = useCallback((item) => {
+    setItems((prev) => [...prev, { ...item, packed: false, isUserAdded: true }]);
+  }, []);
+
+  return { items, togglePacked, editLabel, removeItem, addItem, addFullItem, setCount, totalVolume };
 }

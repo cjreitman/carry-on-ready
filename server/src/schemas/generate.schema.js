@@ -11,9 +11,10 @@ const stopSchema = z.object({
 const generateInputSchema = z.object({
   stops: z.array(stopSchema).min(1, 'At least one stop is required'),
   bagLiters: z.number().positive(),
-  climateOverall: z.enum(['cold', 'moderate', 'hot', 'mixed', 'rainy']),
+  climateOverall: z.enum(['cold', 'moderate', 'hot', 'mixed']).optional(),
   laundry: z.enum(['none', 'weekly', 'frequent']),
   workSetup: z.enum(['none', 'light', 'heavy']),
+  gender: z.enum(['male', 'female', 'non-binary', 'prefer-not-to-say']),
   passportRegion: z.enum(['US', 'EU', 'UK', 'other']),
   schengenDaysUsedLast180: z.number().int().min(0).max(90),
   mustBringItems: z.array(z.string().min(1)).optional(),

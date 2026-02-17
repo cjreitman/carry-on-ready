@@ -3,6 +3,7 @@ const { computeDerived } = require('./derive');
 const { applyCaps } = require('./caps');
 const { attachVolume, computeVolumeDerived } = require('./volume');
 
+const { BASELINE_ITEMS } = require('./baselineItems');
 const clothingRule = require('./rules/clothing');
 const techRule = require('./rules/tech');
 const documentsRule = require('./rules/documents');
@@ -11,6 +12,51 @@ const healthRule = require('./rules/health');
 const resilienceRule = require('./rules/resilience');
 
 const RULES_VERSION = '1.0.0';
+
+function getClothingLabels(gender) {
+  if (gender === 'male') return {
+    shoes: 'Shoes (wear bulkiest, pack the other)',
+    pants: 'Pants / shorts',
+    shirts: 'Merino T-shirts / tops',
+    underwear: 'Merino boxers',
+    socks: 'Merino socks',
+    midlayers: 'Merino sweater / midlayer',
+    outerwear: 'Outerwear',
+  };
+  if (gender === 'female') return {
+    shoes: 'Shoes (wear bulkiest, pack the other)',
+    pants: 'Bottoms (pants, skirt, or leggings)',
+    shirts: 'Tops (quick-dry preferred)',
+    underwear: 'Underwear',
+    socks: 'Socks (merino recommended)',
+    midlayers: 'Merino sweater / midlayer',
+    outerwear: 'Outerwear',
+  };
+  // non-binary / prefer-not-to-say
+  return {
+    shoes: 'Shoes (wear bulkiest, pack the other)',
+    pants: 'Bottoms',
+    shirts: 'Tops (quick-dry preferred)',
+    underwear: 'Underwear (merino recommended)',
+    socks: 'Socks (merino recommended)',
+    midlayers: 'Sweater / midlayer',
+    outerwear: 'Outerwear',
+  };
+}
+
+const OPTIONAL_ADDONS = [
+  { id: 'opt-sandals', label: 'Minimalist sandals', tooltip: '~1.2L per pair. Useful for hostels, beaches, or resting primary shoes.' },
+  { id: 'opt-powerbank', label: 'Power bank', tooltip: '~0.25L. Useful for long travel days without outlets.' },
+  { id: 'opt-speaker', label: 'Bluetooth speaker', tooltip: '~0.3L. Compact option for downtime.' },
+  { id: 'opt-extra-cubes', label: 'Extra packing cubes', tooltip: '~0.5L. Helps separate clean and dirty clothes.' },
+  { id: 'opt-towel', label: 'Travel towel (microfiber)', tooltip: '~0.4L. Dries 3x faster than cotton.' },
+  { id: 'opt-flashdrive', label: 'Flash drive', tooltip: '~0.02L. Offline backup for important documents.' },
+  { id: 'opt-notebook', label: 'Small notebook', tooltip: '~0.15L. For journaling or jotting directions.' },
+  { id: 'opt-airtag', label: 'AirTag / tracker', tooltip: '~0.02L. Track your bag in case of loss.' },
+  { id: 'opt-sunglasses-case', label: 'Sunglasses (hard case)', tooltip: '~0.15L. Protects lenses in a packed bag.' },
+  { id: 'opt-shaver', label: 'Electric shaver / trimmer', tooltip: '~0.25L. USB-rechargeable, saves space over razors.' },
+  { id: 'opt-makeup', label: 'Makeup kit (travel size)', tooltip: '~0.5L. Decant into small containers to save space.' },
+];
 
 const CARRYON_PRINCIPLES = [
   '2 shoes max — wear the bulkiest pair on the plane.',
@@ -53,15 +99,16 @@ function generate(rawInput) {
     );
     draft.warnings.push(...capWarnings);
 
-    // Emit clothing items from capped counts
+    // Emit clothing items from capped counts (gender-aware labels)
+    const labels = getClothingLabels(derived.gender);
     const clothingItems = [
-      { key: 'shoes', label: 'Shoes (wear bulkiest, pack the other)' },
-      { key: 'pants', label: 'Pants / bottoms' },
-      { key: 'shirts', label: 'Shirts / tops (quick-dry preferred)' },
-      { key: 'underwear', label: 'Underwear (merino recommended)' },
-      { key: 'socks', label: 'Socks (merino recommended)' },
-      { key: 'midlayers', label: 'Midlayer (fleece or light sweater)' },
-      { key: 'outerwear', label: 'Outerwear' },
+      { key: 'shoes', label: labels.shoes },
+      { key: 'pants', label: labels.pants },
+      { key: 'shirts', label: labels.shirts },
+      { key: 'underwear', label: labels.underwear },
+      { key: 'socks', label: labels.socks },
+      { key: 'midlayers', label: labels.midlayers },
+      { key: 'outerwear', label: labels.outerwear },
     ];
 
     for (const { key, label } of clothingItems) {
@@ -120,10 +167,35 @@ function generate(rawInput) {
 
   // 10. Attach volume metadata to every item
   const checklist = draft.items.map(attachVolume);
+
+  // 11. Inject baseline essential items (skip duplicates by ID)
+  const existingIds = new Set(checklist.map((item) => item.id));
+  for (const baseline of BASELINE_ITEMS) {
+    if (baseline.tier !== 'essential') continue;
+    if (existingIds.has(baseline.id)) continue;
+    if (!baseline.genders.includes('all') && !baseline.genders.includes(derived.gender)) continue;
+    if (!baseline.climates.includes('all') && !baseline.climates.includes(derived.climate)) continue;
+    if (baseline.workSetup && !baseline.workSetup.includes(parsed.workSetup)) continue;
+
+    checklist.push(attachVolume({
+      id: baseline.id,
+      section: baseline.section,
+      label: baseline.label,
+      count: 1,
+      packed: false,
+    }));
+  }
+
   const volumeDerived = computeVolumeDerived(checklist, parsed.bagLiters);
+
+  // 12. Build optional add-ons (always return full list, client manages state)
+  const optionalAddOns = OPTIONAL_ADDONS.map((addon) =>
+    attachVolume({ ...addon, section: 'Optional', count: 1, packed: false })
+  );
 
   return {
     checklist,
+    optionalAddOns,
     notes: draft.notes,
     warnings: draft.warnings,
     derived: {

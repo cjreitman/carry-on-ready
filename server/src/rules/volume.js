@@ -92,6 +92,16 @@ const VOLUME_PROFILE = {
   sunscreen: 0.15,
   rehydration_salts: 0.10,
 
+  // Optional add-on items
+  speaker_bluetooth_mini: 0.30,
+  packing_cubes_extra: 0.50,
+  travel_towel_micro: 0.40,
+  flash_drive: 0.02,
+  notebook_small: 0.15,
+  airtag: 0.02,
+  shaver_electric_mini: 0.25,
+  makeup_kit_travel: 0.50,
+
   DEFAULT_UNKNOWN_ITEM: 0.20,
 };
 
@@ -118,6 +128,8 @@ const ITEM_VOLUME_MAP = {
   'tech-adapter': 'adapter_universal',
   'tech-earbuds': 'earbuds',
   'tech-laptop': 'laptop_13_14',
+  'tech-phone': 'phone',
+  'tech-travel-adapter': 'adapter_universal',
   'tech-mouse': 'DEFAULT_UNKNOWN_ITEM',
   'tech-hub': 'DEFAULT_UNKNOWN_ITEM',
 
@@ -140,12 +152,34 @@ const ITEM_VOLUME_MAP = {
   'health-sunscreen': 'sunscreen',
   'health-rehydration': 'rehydration_salts',
 
+  // Health (new)
+  'health-nailclipper': 'nail_clipper',
+  'health-ziploc': 'ziplocks_set',
+
   // Resilience
   'res-lock': 'lock',
   'res-packbags': 'packing_cubes_set_2',
   'res-ziplock': 'ziplocks_set',
   'res-pen': 'pen',
   'res-daysack': 'daypack_packable',
+  'res-waterbottle': 'water_bottle_collapsible',
+
+  // Clothing extras (gender)
+  'clothing-dress': 'dress_packable',
+  'clothing-leggings': 'leggings_compressive',
+
+  // Optional add-ons
+  'opt-sandals': 'sandals_minimalist_pair',
+  'opt-powerbank': 'powerbank_small',
+  'opt-speaker': 'speaker_bluetooth_mini',
+  'opt-extra-cubes': 'packing_cubes_extra',
+  'opt-towel': 'travel_towel_micro',
+  'opt-flashdrive': 'flash_drive',
+  'opt-notebook': 'notebook_small',
+  'opt-airtag': 'airtag',
+  'opt-sunglasses-case': 'sunglasses_case',
+  'opt-shaver': 'shaver_electric_mini',
+  'opt-makeup': 'makeup_kit_travel',
 };
 
 /**

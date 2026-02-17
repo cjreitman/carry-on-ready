@@ -38,9 +38,22 @@ function computeDerived(input) {
     ? input.schengenDaysUsedLast180 + schengenDaysThisTrip
     : null;
 
-  const rainExpected =
-    input.climateOverall === 'rainy' ||
-    input.stops.some((s) => s.rainExpected === true);
+  // Infer climate: explicit climateOverall > stop overrides > default 'moderate'
+  let climate;
+  if (input.climateOverall) {
+    climate = input.climateOverall;
+  } else {
+    const overrides = input.stops.map((s) => s.climateOverride).filter(Boolean);
+    if (overrides.length === 0) {
+      climate = 'moderate';
+    } else if (overrides.every((o) => o === overrides[0])) {
+      climate = overrides[0];
+    } else {
+      climate = 'mixed';
+    }
+  }
+
+  const rainExpected = input.stops.some((s) => s.rainExpected === true);
 
   return {
     stopDaysList,
@@ -50,10 +63,11 @@ function computeDerived(input) {
     schengenApplies,
     schengenDaysThisTrip,
     estimatedSchengenTotal,
-    climate: input.climateOverall,
+    climate,
     laundry: input.laundry,
     workSetup: input.workSetup,
     rainExpected,
+    gender: input.gender,
   };
 }
 

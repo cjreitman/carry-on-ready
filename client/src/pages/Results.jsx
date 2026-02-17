@@ -411,6 +411,67 @@ const EmptyTitle = styled.h1`
   margin-bottom: ${({ theme }) => theme.spacing.md};
 `;
 
+// --- Add-on styles ---
+
+const AddOnSectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+`;
+
+const AddOnToggle = styled.button`
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.colors.primary};
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+`;
+
+const AddOnRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  padding: 6px 0;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  font-size: 0.9rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const AddOnLabel = styled.span`
+  flex: 1;
+  min-width: 0;
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+const AddOnBtn = styled.button`
+  background: none;
+  border: 1px solid ${({ $added, theme }) =>
+    $added ? theme.colors.border : theme.colors.primary};
+  border-radius: 4px;
+  padding: 3px 12px;
+  font-size: 0.8rem;
+  color: ${({ $added, theme }) =>
+    $added ? theme.colors.textLight : theme.colors.primary};
+  cursor: ${({ $added }) => ($added ? 'default' : 'pointer')};
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: ${({ $added, theme }) =>
+      $added ? 'transparent' : theme.colors.bgLight};
+  }
+`;
+
+const LowCountWarn = styled.span`
+  @media print {
+    display: none;
+  }
+`;
+
 // --- Subcomponents ---
 
 function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip, highlighted }) {
@@ -447,6 +508,9 @@ function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip, h
   const count = item.count ?? 1;
   const volEach = item.volumeEachLiters ?? 0.2;
   const volTotal = +(volEach * count).toFixed(1);
+
+  const LOW_COUNT_IDS = new Set(['clothing-underwear', 'clothing-socks', 'clothing-shirts']);
+  const showLowWarn = LOW_COUNT_IDS.has(item.id) && count > 0 && count < 3;
 
   return (
     <ItemRow data-print-row $highlighted={highlighted}>
@@ -490,6 +554,11 @@ function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip, h
         >
           +
         </StepButton>
+        {showLowWarn && (
+          <LowCountWarn>
+            <InfoTooltip text="Reducing below 3 may require daily washing." />
+          </LowCountWarn>
+        )}
       </CountStepperWrap>
       {count > 1 && <PrintCount>x{count}</PrintCount>}
       <RemoveBtn onClick={() => onRemove(item.id)} title="Remove item">
@@ -559,12 +628,17 @@ export default function Results() {
   const result = location.state?.result;
   const inputs = location.state?.inputs;
 
-  const { items, togglePacked, editLabel, removeItem, addItem, setCount, totalVolume } = useChecklist(
+  const { items, togglePacked, editLabel, removeItem, addItem, addFullItem, setCount, totalVolume } = useChecklist(
     result?.checklist
   );
 
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [addOnsExpanded, setAddOnsExpanded] = useState(true);
+  const [optionalAddOns] = useState(() => result?.optionalAddOns || []);
+
+  // Derive which add-on IDs are already in the checklist
+  const checklistIds = useMemo(() => new Set(items.map((i) => i.id)), [items]);
 
   // Keep stable section order from original generation
   const [sectionOrder] = useState(() =>
@@ -629,6 +703,11 @@ export default function Results() {
       return;
     }
     printChecklist();
+  }
+
+  function handleAddOn(addon) {
+    if (checklistIds.has(addon.id)) return;
+    addFullItem({ ...addon, isAddOn: true });
   }
 
   async function handleSave() {
@@ -742,6 +821,38 @@ export default function Results() {
           </Section>
         );
       })}
+
+      {/* Optional Add-ons */}
+      {optionalAddOns.length > 0 && (
+        <Section>
+          <AddOnSectionHeader>
+            <SectionTitle style={{ marginBottom: 0 }}>Optional Add-ons</SectionTitle>
+            <AddOnToggle onClick={() => setAddOnsExpanded((v) => !v)}>
+              {addOnsExpanded ? 'Hide' : 'Show'}
+            </AddOnToggle>
+          </AddOnSectionHeader>
+          {addOnsExpanded &&
+            optionalAddOns.map((addon) => {
+              const added = checklistIds.has(addon.id);
+              return (
+                <AddOnRow key={addon.id}>
+                  <AddOnLabel>
+                    {addon.label}
+                    {addon.tooltip && <InfoTooltip text={addon.tooltip} />}
+                  </AddOnLabel>
+                  <VolumeHint>{addon.volumeEachLiters}L</VolumeHint>
+                  <AddOnBtn
+                    $added={added}
+                    disabled={added}
+                    onClick={() => handleAddOn(addon)}
+                  >
+                    {added ? 'Added' : 'Add'}
+                  </AddOnBtn>
+                </AddOnRow>
+              );
+            })}
+        </Section>
+      )}
 
       {/* Tips / notes */}
       {tipNotes.length > 0 && (

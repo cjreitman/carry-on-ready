@@ -60,6 +60,11 @@ module.exports = function clothingRule(ctx, draft) {
     shirts = Math.min(shirts, totalDays);
   }
 
+  // Minimum recommendation floor (overrides short-trip clamp intentionally)
+  underwear = Math.max(3, underwear);
+  socks = Math.max(3, socks);
+  shirts = Math.max(3, shirts);
+
   // Store raw counts on draft for capping
   draft.clothingCounts = { shoes, pants, shirts, underwear, socks, midlayers: 0, outerwear: 0 };
 
@@ -76,7 +81,7 @@ module.exports = function clothingRule(ctx, draft) {
     draft.notes.push('Tip: merino base layers add warmth without bulk.');
   }
 
-  if (derived.rainExpected || climate === 'rainy' || climate === 'mixed') {
+  if (derived.rainExpected || climate === 'mixed') {
     draft.clothingCounts.outerwear += 1;
     draft.items.push({
       id: 'clothing-rain-shell',
@@ -91,10 +96,28 @@ module.exports = function clothingRule(ctx, draft) {
     draft.clothingCounts.outerwear += 1;
   }
 
+  // --- Gender-specific standalone extras ---
+  if (ctx.derived.gender === 'female') {
+    draft.items.push({
+      id: 'clothing-leggings',
+      section: 'Clothing',
+      label: 'Leggings',
+      count: 1,
+      packed: false,
+    });
+    if (ctx.derived.climate === 'hot' || ctx.derived.climate === 'mixed') {
+      draft.items.push({
+        id: 'clothing-dress',
+        section: 'Clothing',
+        label: 'Packable dress',
+        count: 1,
+        packed: false,
+      });
+    }
+  }
+
   // --- Merino suggestions ---
   draft.notes.push(
     'Tip: merino wool underwear, socks, and shirts reduce odor and let you pack fewer items.'
   );
-
-  // TODO: add more climate-specific modifiers
 };

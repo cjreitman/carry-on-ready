@@ -251,6 +251,31 @@ const CardHint = styled.p`
   margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;
 
+// --- Gender pill styles ---
+
+const PillRow = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+const GenderPill = styled.button`
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  border: 1px solid ${({ $active, theme }) =>
+    $active ? theme.colors.primary : theme.colors.border};
+  background: ${({ $active, theme }) =>
+    $active ? theme.colors.primary : 'transparent'};
+  color: ${({ $active, theme }) =>
+    $active ? '#fff' : theme.colors.text};
+  cursor: pointer;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
 // --- Rain checkbox styles ---
 
 const CheckboxRow = styled.label`
@@ -418,7 +443,12 @@ const CLIMATE_OPTIONS = ['cold', 'moderate', 'hot', 'mixed'];
 const LAUNDRY_OPTIONS = ['none', 'weekly', 'frequent'];
 const WORK_OPTIONS = ['none', 'light', 'heavy'];
 const PASSPORT_OPTIONS = ['US', 'EU', 'UK', 'other'];
-const CLIMATE_ALL_OPTIONS = ['cold', 'moderate', 'hot', 'mixed', 'rainy'];
+const GENDER_OPTIONS = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'non-binary', label: 'Non-binary' },
+  { value: 'prefer-not-to-say', label: 'Prefer not to say' },
+];
 
 // --- Component ---
 
@@ -432,11 +462,11 @@ export default function Build() {
   const [stops, setStops] = useState([{ ...EMPTY_STOP }]);
   const [passportRegion, setPassportRegion] = useState('US');
   const [schengenDays, setSchengenDays] = useState(0);
+  const [gender, setGender] = useState('');
   const [mustBringItems, setMustBringItems] = useState([]);
 
   // Step 2 state
   const [bagLiters, setBagLiters] = useState(35);
-  const [climateOverall, setClimateOverall] = useState('moderate');
   const [laundry, setLaundry] = useState('none');
   const [workSetup, setWorkSetup] = useState('none');
 
@@ -470,6 +500,9 @@ export default function Build() {
       if (s.endDate < s.startDate) {
         return `Stop ${i + 1}: End date must be on or after start date.`;
       }
+    }
+    if (!gender) {
+      return 'Please select a gender option.';
     }
     return '';
   }
@@ -518,9 +551,9 @@ export default function Build() {
         rainExpected: s.rainExpected || false,
       })),
       bagLiters: Number(bagLiters),
-      climateOverall,
       laundry,
       workSetup,
+      gender,
       passportRegion,
       schengenDaysUsedLast180: Number(schengenDays),
       mustBringItems: mustBringItems.length > 0 ? mustBringItems : undefined,
@@ -649,6 +682,22 @@ export default function Build() {
         </Card>
 
         <Card style={{ marginTop: '16px' }}>
+          <CardLabel>Gender</CardLabel>
+          <PillRow>
+            {GENDER_OPTIONS.map((g) => (
+              <GenderPill
+                key={g.value}
+                type="button"
+                $active={gender === g.value}
+                onClick={() => setGender(g.value)}
+              >
+                {g.label}
+              </GenderPill>
+            ))}
+          </PillRow>
+        </Card>
+
+        <Card style={{ marginTop: '16px' }}>
           <CardLabel>Must-bring items (optional)</CardLabel>
           <CardHint>
             Add any event-specific or required gear (e.g. skates, wedding outfit, running shoes).
@@ -713,20 +762,6 @@ export default function Build() {
               value={bagLiters}
               onChange={(e) => setBagLiters(e.target.value)}
             />
-          </Field>
-          <Field>
-            Default Climate
-            <Select
-              value={climateOverall}
-              onChange={(e) => setClimateOverall(e.target.value)}
-            >
-              {CLIMATE_ALL_OPTIONS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </Select>
-            <FieldHint>Used for any stop without a climate override.</FieldHint>
           </Field>
         </Row>
         <Row>
