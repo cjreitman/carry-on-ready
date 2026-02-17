@@ -1,0 +1,100 @@
+/**
+ * Clothing rule: (ctx, draft) => void
+ * ctx = { input, derived }
+ * draft = { items, notes, warnings }
+ */
+module.exports = function clothingRule(ctx, draft) {
+  const { derived, input } = ctx;
+  const { totalDays, climate, laundry } = derived;
+
+  // --- Base counts ---
+  let shoes = 2;
+  let pants = 2;
+  let shirts = 4;
+  let underwear, socks;
+
+  // Hot-only: reduce shoes and pants
+  if (climate === 'hot') {
+    shoes = 1;
+    pants = 1;
+  }
+
+  // Laundry adjustments
+  if (laundry === 'frequent') {
+    underwear = 4;
+    socks = 4;
+    shirts = 3;
+  } else if (laundry === 'weekly') {
+    underwear = 6;
+    socks = 6;
+    shirts = 4;
+  } else {
+    // laundry === 'none'
+    if (totalDays <= 7) {
+      underwear = totalDays;
+      socks = totalDays;
+      shirts = Math.min(5, totalDays);
+    } else {
+      underwear = 7;
+      socks = 7;
+      shirts = 5;
+      draft.notes.push(
+        'No laundry access for 7+ days: pack detergent sheets and plan sink washes.'
+      );
+      draft.items.push({
+        id: 'clothing-detergent',
+        section: 'Clothing',
+        label: 'Detergent sheets / travel soap',
+        count: 1,
+        packed: false,
+      });
+    }
+  }
+
+  // Short-trip clamp: don't pack more than you have days for
+  if (totalDays <= 7) {
+    underwear = Math.min(underwear, totalDays);
+    socks = Math.min(socks, totalDays);
+  }
+  if (totalDays <= 3) {
+    shirts = Math.min(shirts, totalDays);
+  }
+
+  // Store raw counts on draft for capping
+  draft.clothingCounts = { shoes, pants, shirts, underwear, socks, midlayers: 0, outerwear: 0 };
+
+  // --- Climate modifiers ---
+  if (climate === 'cold' || climate === 'mixed') {
+    draft.clothingCounts.midlayers = 1;
+    draft.items.push({
+      id: 'clothing-packable-down',
+      section: 'Clothing',
+      label: 'Packable down jacket',
+      count: 1,
+      packed: false,
+    });
+    draft.notes.push('Tip: merino base layers add warmth without bulk.');
+  }
+
+  if (climate === 'rainy' || climate === 'mixed') {
+    draft.clothingCounts.outerwear += 1;
+    draft.items.push({
+      id: 'clothing-rain-shell',
+      section: 'Clothing',
+      label: 'Packable rain shell',
+      count: 1,
+      packed: false,
+    });
+  }
+
+  if (climate === 'cold') {
+    draft.clothingCounts.outerwear += 1;
+  }
+
+  // --- Merino suggestions ---
+  draft.notes.push(
+    'Tip: merino wool underwear, socks, and shirts reduce odor and let you pack fewer items.'
+  );
+
+  // TODO: add more climate-specific modifiers
+};

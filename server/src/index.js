@@ -10,9 +10,13 @@ app.use(helmet());
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
+const generateRouter = require('./routes/generate');
+
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
+
+app.use('/api/generate', generateRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
