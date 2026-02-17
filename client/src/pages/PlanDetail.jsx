@@ -105,15 +105,45 @@ const LabelInput = styled.input`
   outline: none;
 `;
 
-const CountBadge = styled.span`
-  background: ${({ theme }) => theme.colors.border};
+const CountStepperWrap = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+`;
+
+const StepButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 4px;
+  background: none;
   color: ${({ theme }) => theme.colors.textLight};
   font-size: 0.8rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: ${({ theme }) => theme.colors.text};
+    border-color: ${({ theme }) => theme.colors.textLight};
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+`;
+
+const CountNumber = styled.span`
+  min-width: 20px;
+  text-align: center;
+  font-size: 0.8rem;
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-  white-space: nowrap;
-  flex-shrink: 0;
+  color: ${({ theme }) => theme.colors.textLight};
 `;
 
 const RemoveBtn = styled.button`
@@ -186,7 +216,7 @@ const ErrorMsg = styled.p`
 
 // --- Subcomponents ---
 
-function EditableItem({ item, onToggle, onEdit, onRemove }) {
+function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(item.label);
   const inputRef = useRef(null);
@@ -236,7 +266,27 @@ function EditableItem({ item, onToggle, onEdit, onRemove }) {
           {item.label}
         </LabelText>
       )}
-      {item.count > 1 && <CountBadge>x{item.count}</CountBadge>}
+      {(() => {
+        const count = item.count ?? 1;
+        return (
+          <CountStepperWrap>
+            <StepButton
+              aria-label="Decrease count"
+              disabled={count <= 0}
+              onClick={() => onSetCount(item.id, count - 1)}
+            >
+              &minus;
+            </StepButton>
+            <CountNumber>{count}</CountNumber>
+            <StepButton
+              aria-label="Increase count"
+              onClick={() => onSetCount(item.id, count + 1)}
+            >
+              +
+            </StepButton>
+          </CountStepperWrap>
+        );
+      })()}
       <RemoveBtn onClick={() => onRemove(item.id)} title="Remove item">
         &times;
       </RemoveBtn>
@@ -322,7 +372,7 @@ export default function PlanDetail() {
       .finally(() => setLoading(false));
   }, [id, isPro, navigate]);
 
-  const { items, togglePacked, editLabel, removeItem, addItem } = useChecklist(
+  const { items, togglePacked, editLabel, removeItem, addItem, setCount } = useChecklist(
     plan?.checklistSnapshot
   );
 
@@ -387,6 +437,7 @@ export default function PlanDetail() {
                   onToggle={togglePacked}
                   onEdit={editLabel}
                   onRemove={removeItem}
+                  onSetCount={setCount}
                 />
               ))
             )}

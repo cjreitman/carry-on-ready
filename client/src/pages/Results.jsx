@@ -5,6 +5,24 @@ import useChecklist from '../hooks/useChecklist';
 import usePro from '../context/ProContext';
 import { copyChecklistToClipboard, printChecklist } from '../utils/export';
 import api from '../utils/api';
+import InfoTooltip from '../components/InfoTooltip';
+
+// --- Tooltip copy ---
+
+const ITEM_TOOLTIPS = {
+  'clothing-shoes':
+    'If packing a second pair for running, choose minimalist or collapsible shoes to reduce bulk.',
+  'clothing-shirts':
+    'Merino wool resists odor, allowing fewer shirts for longer trips.',
+  'clothing-underwear':
+    'Quick-dry fabrics allow sink washing and overnight drying.',
+  'clothing-socks':
+    'Merino socks dry fast and reduce odor over multi-day wear.',
+  'health-toiletries':
+    'Use 100ml TSA-compliant containers to stay carry-on legal.',
+  'res-packbags':
+    'Compression packing cubes can reduce volume by 20–30%.',
+};
 
 // --- Styled pieces ---
 
@@ -142,15 +160,61 @@ const LabelInput = styled.input`
   outline: none;
 `;
 
-const CountBadge = styled.span`
-  background: ${({ theme }) => theme.colors.border};
+const CountStepperWrap = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+
+  @media print {
+    display: none;
+  }
+`;
+
+const StepButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 4px;
+  background: none;
   color: ${({ theme }) => theme.colors.textLight};
   font-size: 0.8rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: ${({ theme }) => theme.colors.text};
+    border-color: ${({ theme }) => theme.colors.textLight};
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+`;
+
+const CountNumber = styled.span`
+  min-width: 20px;
+  text-align: center;
+  font-size: 0.8rem;
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-  white-space: nowrap;
+  color: ${({ theme }) => theme.colors.textLight};
+`;
+
+const PrintCount = styled.span`
+  display: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.textLight};
   flex-shrink: 0;
+
+  @media print {
+    display: inline;
+  }
 `;
 
 const RemoveBtn = styled.button`
@@ -278,7 +342,7 @@ const EmptyTitle = styled.h1`
 
 // --- Subcomponents ---
 
-function EditableItem({ item, onToggle, onEdit, onRemove }) {
+function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(item.label);
   const inputRef = useRef(null);
@@ -330,9 +394,33 @@ function EditableItem({ item, onToggle, onEdit, onRemove }) {
           onClick={() => setEditing(true)}
         >
           {item.label}
+          {tooltip && <InfoTooltip text={tooltip} />}
         </LabelText>
       )}
-      {item.count > 1 && <CountBadge>x{item.count}</CountBadge>}
+      {(() => {
+        const count = item.count ?? 1;
+        return (
+          <>
+            <CountStepperWrap>
+              <StepButton
+                aria-label="Decrease count"
+                disabled={count <= 0}
+                onClick={() => onSetCount(item.id, count - 1)}
+              >
+                &minus;
+              </StepButton>
+              <CountNumber>{count}</CountNumber>
+              <StepButton
+                aria-label="Increase count"
+                onClick={() => onSetCount(item.id, count + 1)}
+              >
+                +
+              </StepButton>
+            </CountStepperWrap>
+            {count > 1 && <PrintCount>x{count}</PrintCount>}
+          </>
+        );
+      })()}
       <RemoveBtn onClick={() => onRemove(item.id)} title="Remove item">
         &times;
       </RemoveBtn>
@@ -400,7 +488,7 @@ export default function Results() {
   const result = location.state?.result;
   const inputs = location.state?.inputs;
 
-  const { items, togglePacked, editLabel, removeItem, addItem } = useChecklist(
+  const { items, togglePacked, editLabel, removeItem, addItem, setCount } = useChecklist(
     result?.checklist
   );
 
@@ -521,6 +609,8 @@ export default function Results() {
                   onToggle={togglePacked}
                   onEdit={editLabel}
                   onRemove={removeItem}
+                  onSetCount={setCount}
+                  tooltip={ITEM_TOOLTIPS[item.id]}
                 />
               ))
             )}

@@ -43,5 +43,12 @@ export default function useChecklist(initialItems) {
     ]);
   }, []);
 
-  return { items, togglePacked, editLabel, removeItem, addItem };
+  const setCount = useCallback((id, count) => {
+    const next = Math.max(0, Math.round(count));
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, count: next } : item))
+    );
+  }, []);
+
+  return { items, togglePacked, editLabel, removeItem, addItem, setCount };
 }
