@@ -1,6 +1,7 @@
 const { generateInputSchema } = require('../schemas/generate.schema');
 const { computeDerived } = require('./derive');
 const { applyCaps } = require('./caps');
+const { attachVolume, computeVolumeDerived } = require('./volume');
 
 const clothingRule = require('./rules/clothing');
 const techRule = require('./rules/tech');
@@ -108,12 +109,21 @@ function generate(rawInput) {
     );
   }
 
-  // 8. Carry-on principles (always shown)
+  // 8. Minimum clothing guidance
+  draft.notes.push(
+    'Minimum viable rotation: 3 shirts / socks / underwear. 5 is preferred.'
+  );
+
+  // 9. Carry-on principles (always shown)
   draft.notes.push('--- Carry-on Principles ---');
   draft.notes.push(...CARRYON_PRINCIPLES);
 
+  // 10. Attach volume metadata to every item
+  const checklist = draft.items.map(attachVolume);
+  const volumeDerived = computeVolumeDerived(checklist, parsed.bagLiters);
+
   return {
-    checklist: draft.items,
+    checklist,
     notes: draft.notes,
     warnings: draft.warnings,
     derived: {
@@ -123,6 +133,7 @@ function generate(rawInput) {
       schengenApplies: derived.schengenApplies,
       schengenDaysThisTrip: derived.schengenDaysThisTrip,
       estimatedSchengenTotal: derived.estimatedSchengenTotal,
+      ...volumeDerived,
     },
     rulesVersion: RULES_VERSION,
   };

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import useChecklist from '../hooks/useChecklist';
@@ -93,6 +93,60 @@ const SummaryNote = styled.p`
   margin-bottom: ${({ theme }) => theme.spacing.lg};
 `;
 
+// --- Capacity bar ---
+
+const CapacityWrap = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+
+  @media print {
+    display: none;
+  }
+`;
+
+const CapacityLabel = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: ${({ theme }) => theme.colors.textLight};
+
+  strong {
+    color: ${({ $state, theme }) =>
+      $state === 'danger'
+        ? theme.colors.warning
+        : $state === 'warning'
+        ? '#e8a735'
+        : theme.colors.text};
+  }
+`;
+
+const CapacityTrack = styled.div`
+  height: 10px;
+  border-radius: 5px;
+  background: ${({ theme }) => theme.colors.border};
+  overflow: hidden;
+`;
+
+const CapacityFill = styled.div`
+  height: 100%;
+  border-radius: 5px;
+  width: ${({ $pct }) => Math.min($pct, 100)}%;
+  background: ${({ $state, theme }) =>
+    $state === 'danger'
+      ? theme.colors.warning
+      : $state === 'warning'
+      ? '#e8a735'
+      : theme.colors.success};
+  transition: width 0.3s ease;
+`;
+
+const CapacityHint = styled.div`
+  font-size: 0.75rem;
+  color: ${({ $state, theme }) =>
+    $state === 'danger' ? theme.colors.warning : theme.colors.textLight};
+  margin-top: 3px;
+`;
+
 const WarningBox = styled.div`
   background: ${({ theme }) => theme.colors.warningBg};
   border-left: 3px solid ${({ theme }) => theme.colors.warning};
@@ -124,6 +178,12 @@ const ItemRow = styled.div`
   padding: 6px 0;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   font-size: 0.95rem;
+  background: ${({ $highlighted, theme }) =>
+    $highlighted ? theme.colors.warningBg : 'transparent'};
+  margin: ${({ $highlighted }) => ($highlighted ? '0 -8px' : '0')};
+  padding-left: ${({ $highlighted }) => ($highlighted ? '8px' : '0')};
+  padding-right: ${({ $highlighted }) => ($highlighted ? '8px' : '0')};
+  border-radius: ${({ $highlighted }) => ($highlighted ? '4px' : '0')};
 
   &:last-child {
     border-bottom: none;
@@ -236,6 +296,17 @@ const RemoveBtn = styled.button`
   }
 `;
 
+const VolumeHint = styled.span`
+  font-size: 0.7rem;
+  color: ${({ theme }) => theme.colors.textLight};
+  flex-shrink: 0;
+  white-space: nowrap;
+
+  @media print {
+    display: none;
+  }
+`;
+
 const EmptySection = styled.p`
   font-size: 0.9rem;
   color: ${({ theme }) => theme.colors.textLight};
@@ -342,7 +413,7 @@ const EmptyTitle = styled.h1`
 
 // --- Subcomponents ---
 
-function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip }) {
+function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip, highlighted }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(item.label);
   const inputRef = useRef(null);
@@ -373,8 +444,12 @@ function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip })
     }
   }
 
+  const count = item.count ?? 1;
+  const volEach = item.volumeEachLiters ?? 0.2;
+  const volTotal = +(volEach * count).toFixed(1);
+
   return (
-    <ItemRow data-print-row>
+    <ItemRow data-print-row $highlighted={highlighted}>
       <Checkbox
         type="checkbox"
         checked={item.packed}
@@ -397,30 +472,26 @@ function EditableItem({ item, onToggle, onEdit, onRemove, onSetCount, tooltip })
           {tooltip && <InfoTooltip text={tooltip} />}
         </LabelText>
       )}
-      {(() => {
-        const count = item.count ?? 1;
-        return (
-          <>
-            <CountStepperWrap>
-              <StepButton
-                aria-label="Decrease count"
-                disabled={count <= 0}
-                onClick={() => onSetCount(item.id, count - 1)}
-              >
-                &minus;
-              </StepButton>
-              <CountNumber>{count}</CountNumber>
-              <StepButton
-                aria-label="Increase count"
-                onClick={() => onSetCount(item.id, count + 1)}
-              >
-                +
-              </StepButton>
-            </CountStepperWrap>
-            {count > 1 && <PrintCount>x{count}</PrintCount>}
-          </>
-        );
-      })()}
+      <VolumeHint title={`Volume source: ${item.volumeSource || 'default'}`}>
+        {volTotal}L
+      </VolumeHint>
+      <CountStepperWrap>
+        <StepButton
+          aria-label="Decrease count"
+          disabled={count <= 0}
+          onClick={() => onSetCount(item.id, count - 1)}
+        >
+          &minus;
+        </StepButton>
+        <CountNumber>{count}</CountNumber>
+        <StepButton
+          aria-label="Increase count"
+          onClick={() => onSetCount(item.id, count + 1)}
+        >
+          +
+        </StepButton>
+      </CountStepperWrap>
+      {count > 1 && <PrintCount>x{count}</PrintCount>}
       <RemoveBtn onClick={() => onRemove(item.id)} title="Remove item">
         &times;
       </RemoveBtn>
@@ -488,7 +559,7 @@ export default function Results() {
   const result = location.state?.result;
   const inputs = location.state?.inputs;
 
-  const { items, togglePacked, editLabel, removeItem, addItem, setCount } = useChecklist(
+  const { items, togglePacked, editLabel, removeItem, addItem, setCount, totalVolume } = useChecklist(
     result?.checklist
   );
 
@@ -499,6 +570,35 @@ export default function Results() {
   const [sectionOrder] = useState(() =>
     result ? getSectionOrder(result.checklist) : []
   );
+
+  // Volume / capacity derived values
+  const usableCapacity = result ? +(result.derived?.usableCapacityLiters || (inputs?.bagLiters * 0.85)).toFixed(1) : 0;
+  const percentUsed = usableCapacity > 0 ? Math.round((totalVolume / usableCapacity) * 100) : 0;
+  const capacityState = percentUsed > 100 ? 'danger' : percentUsed >= 90 ? 'warning' : 'normal';
+  const overBy = capacityState === 'danger' ? +(totalVolume - usableCapacity).toFixed(1) : 0;
+
+  // When over capacity, find top 3 highest-volume items to highlight
+  const highlightIds = useMemo(() => {
+    if (capacityState !== 'danger') return new Set();
+    const sorted = [...items]
+      .map((it) => ({
+        id: it.id,
+        vol: (it.volumeEachLiters ?? 0.2) * (it.count ?? 1),
+        isUser: !!it.isUserAdded,
+      }))
+      .sort((a, b) => b.vol - a.vol);
+    const ids = new Set();
+    // Always highlight user-added items
+    for (const s of sorted) {
+      if (s.isUser) ids.add(s.id);
+    }
+    // Add top 3 by volume
+    for (const s of sorted) {
+      if (ids.size >= 3) break;
+      ids.add(s.id);
+    }
+    return ids;
+  }, [items, capacityState]);
 
   if (!result) {
     return (
@@ -588,6 +688,29 @@ export default function Results() {
       </SummaryBar>
       <SummaryNote>Counts already capped for your bag tier.</SummaryNote>
 
+      {/* Capacity bar */}
+      <CapacityWrap>
+        <CapacityLabel $state={capacityState}>
+          <span>Estimated pack volume</span>
+          <strong>
+            {totalVolume}L / {usableCapacity}L usable ({percentUsed}%)
+          </strong>
+        </CapacityLabel>
+        <CapacityTrack>
+          <CapacityFill $pct={percentUsed} $state={capacityState} />
+        </CapacityTrack>
+        {capacityState === 'danger' && (
+          <CapacityHint $state="danger">
+            Over by {overBy}L — consider removing or reducing high-volume items highlighted below.
+          </CapacityHint>
+        )}
+        {capacityState === 'warning' && (
+          <CapacityHint $state="warning">
+            Getting tight — you may want to slim down a few items.
+          </CapacityHint>
+        )}
+      </CapacityWrap>
+
       {/* Warnings */}
       {warnings.map((w, i) => (
         <WarningBox key={i}>{w}</WarningBox>
@@ -611,6 +734,7 @@ export default function Results() {
                   onRemove={removeItem}
                   onSetCount={setCount}
                   tooltip={ITEM_TOOLTIPS[item.id]}
+                  highlighted={highlightIds.has(item.id)}
                 />
               ))
             )}

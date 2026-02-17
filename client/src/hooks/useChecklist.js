@@ -1,4 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+
+const DEFAULT_VOLUME = 0.20;
 
 function uid() {
   return `user-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -7,6 +9,18 @@ function uid() {
 export default function useChecklist(initialItems) {
   const [items, setItems] = useState(() =>
     initialItems ? initialItems.map((item) => ({ ...item })) : []
+  );
+
+  const totalVolume = useMemo(
+    () =>
+      +items
+        .reduce(
+          (sum, item) =>
+            sum + (item.volumeEachLiters ?? DEFAULT_VOLUME) * (item.count ?? 1),
+          0
+        )
+        .toFixed(1),
+    [items]
   );
 
   const togglePacked = useCallback((id) => {
@@ -39,6 +53,8 @@ export default function useChecklist(initialItems) {
         count: 1,
         packed: false,
         isUserAdded: true,
+        volumeEachLiters: DEFAULT_VOLUME,
+        volumeSource: 'DEFAULT_UNKNOWN_ITEM',
       },
     ]);
   }, []);
@@ -50,5 +66,5 @@ export default function useChecklist(initialItems) {
     );
   }, []);
 
-  return { items, togglePacked, editLabel, removeItem, addItem, setCount };
+  return { items, togglePacked, editLabel, removeItem, addItem, setCount, totalVolume };
 }
