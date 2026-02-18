@@ -705,7 +705,7 @@ export default function Build() {
                     clearFieldError(`stop-${i}-startDate`);
                     clearFieldError(`stop-${i}-endDate`);
                     if (val && s.endDate && s.endDate < val) {
-                      setFieldErrors((prev) => ({ ...prev, [`stop-${i}-endDate`]: 'End date must be on or after start date.' }));
+                      updateStop(i, 'endDate', val);
                     }
                   }}
                   onClick={(e) => e.target.showPicker?.()}
@@ -717,6 +717,7 @@ export default function Build() {
                 <DateInput
                   id={`field-stop-${i}-endDate`}
                   type="date"
+                  min={s.startDate || undefined}
                   value={s.endDate}
                   onChange={(e) => {
                     const val = e.target.value;
