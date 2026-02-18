@@ -341,7 +341,7 @@ function resolveCanonical(val) {
 
 // --- Autocomplete component ---
 
-function CountryAutocomplete({ value, onCommit, placeholder, inputId }) {
+function CountryAutocomplete({ value, onCommit, placeholder, inputId, disabled }) {
   const [inputText, setInputText] = useState(value);
   const [open, setOpen] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
@@ -439,6 +439,7 @@ function CountryAutocomplete({ value, onCommit, placeholder, inputId }) {
       <DropdownInputStyled
         id={inputId}
         value={inputText}
+        disabled={disabled}
         onChange={(e) => {
           setInputText(e.target.value);
           // Clear committed value while typing
@@ -449,7 +450,7 @@ function CountryAutocomplete({ value, onCommit, placeholder, inputId }) {
           setOpen(true);
           setHighlightIdx(-1);
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => { if (!disabled) setOpen(true); }}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
@@ -602,7 +603,7 @@ export default function Build() {
 
   // Step 1 state
   const [citizenship, setCitizenship] = useState('');
-  const [indefinite, setIndefinite] = useState(false);
+  const [isIndefiniteTravel, setIsIndefiniteTravel] = useState(false);
   const [stops, setStops] = useState([{ ...EMPTY_STOP }]);
   const [gender, setGender] = useState('');
   const [mustBringItems, setMustBringItems] = useState([]);
@@ -652,16 +653,20 @@ export default function Build() {
       }
     }
 
-    if (!citizenship || !isValidCountry(citizenship)) {
-      addError('citizenship', 'Please select a valid country.');
+    if (!isIndefiniteTravel) {
+      if (!citizenship || !isValidCountry(citizenship)) {
+        addError('citizenship', 'Please select a valid country.');
+      }
     }
 
     for (let i = 0; i < stops.length; i++) {
       const s = stops[i];
-      if (!s.countryOrRegion.trim() || !isValidCountry(s.countryOrRegion)) {
-        addError(`stop-${i}-country`, 'Please select a valid country.');
+      if (!isIndefiniteTravel) {
+        if (!s.countryOrRegion.trim() || !isValidCountry(s.countryOrRegion)) {
+          addError(`stop-${i}-country`, 'Please select a valid country.');
+        }
       }
-      if (!indefinite) {
+      if (!isIndefiniteTravel) {
         if (!s.startDate) {
           addError(`stop-${i}-startDate`, 'Required.');
         }
@@ -729,7 +734,7 @@ export default function Build() {
       citizenship: citizenship.trim(),
       stops: stops.map((s) => ({
         countryOrRegion: s.countryOrRegion.trim(),
-        ...(indefinite ? {} : { startDate: s.startDate, endDate: s.endDate }),
+        ...(isIndefiniteTravel ? {} : { startDate: s.startDate, endDate: s.endDate }),
         climateOverride: s.climateOverride || null,
         rainExpected: s.rainExpected,
       })),
@@ -738,7 +743,8 @@ export default function Build() {
       workSetup,
       gender,
       mustBringItems: mustBringItems.length > 0 ? mustBringItems : undefined,
-      indefinite: indefinite || undefined,
+      isIndefiniteTravel: isIndefiniteTravel || undefined,
+      forcePassportRecommended: isIndefiniteTravel || undefined,
     };
 
     try {
@@ -770,6 +776,37 @@ export default function Build() {
         </PrefillBlurb>
 
         <Card>
+          <CheckboxRow>
+            <CheckboxInput
+              type="checkbox"
+              checked={isIndefiniteTravel}
+              onChange={() => {
+                setIsIndefiniteTravel((prev) => {
+                  const next = !prev;
+                  if (next) {
+                    // Collapse to one stop with indefinite defaults
+                    setStops([{
+                      countryOrRegion: '',
+                      startDate: '',
+                      endDate: '',
+                      climateOverride: 'mixed',
+                      rainExpected: true,
+                    }]);
+                  }
+                  return next;
+                });
+              }}
+            />
+            Indefinite / open-ended travel
+          </CheckboxRow>
+          <FieldHint>
+            When enabled, we assume mixed climates and possible rain, and
+            we'll recommend versatile layering essentials. We'll also recommend bringing a passport by default.
+          </FieldHint>
+        </Card>
+
+        {!isIndefiniteTravel && (
+        <Card>
           <CardLabel>Citizenship (passport issuer)</CardLabel>
           <CountryAutocomplete
             value={citizenship}
@@ -779,30 +816,19 @@ export default function Build() {
           />
           {fieldErrors.citizenship && <InlineError>{fieldErrors.citizenship}</InlineError>}
         </Card>
-
-        <Card>
-          <CheckboxRow>
-            <CheckboxInput
-              type="checkbox"
-              checked={indefinite}
-              onChange={() => setIndefinite((v) => !v)}
-            />
-            Indefinite / open-ended travel
-          </CheckboxRow>
-          <FieldHint>
-            When enabled, we assume mixed climates and possible rain, and
-            we'll recommend versatile layering essentials.
-          </FieldHint>
-        </Card>
+        )}
 
         {stops.map((s, i) => (
           <Card key={i}>
+            {!isIndefiniteTravel && (
             <StopHeader>
               <StopLabel>Stop {i + 1}</StopLabel>
               {stops.length > 1 && (
                 <RemoveBtn onClick={() => removeStop(i)}>Remove</RemoveBtn>
               )}
             </StopHeader>
+            )}
+            {!isIndefiniteTravel && (
             <Row>
               <Field $flex={2}>
                 Country / Region
@@ -815,7 +841,8 @@ export default function Build() {
                 {fieldErrors[`stop-${i}-country`] && <InlineError>{fieldErrors[`stop-${i}-country`]}</InlineError>}
               </Field>
             </Row>
-            {!indefinite && (
+            )}
+            {!isIndefiniteTravel && (
             <Row>
               <Field>
                 Start Date
@@ -865,7 +892,7 @@ export default function Build() {
                   value={s.climateOverride}
                   onCommit={(val) => updateStop(i, 'climateOverride', val)}
                   options={[
-                    { value: '', label: (() => { if (indefinite) return 'Auto (mixed)'; const inf = inferClimateFromStop(s); return inf ? `Auto (${inf.climate})` : 'Auto (based on destination + dates)'; })() },
+                    { value: '', label: (() => { if (isIndefiniteTravel) return 'Auto (mixed)'; const inf = inferClimateFromStop(s); return inf ? `Auto (${inf.climate})` : 'Auto (based on destination + dates)'; })() },
                     ...CLIMATE_OPTIONS.map((c) => ({ value: c, label: c })),
                   ]}
                   placeholder="Select climate"
@@ -888,12 +915,12 @@ export default function Build() {
                         />
                         Rain expected
                       </CheckboxRow>
-                      {s.rainExpected !== null && (
+                      {!isIndefiniteTravel && s.rainExpected !== null && (
                         <ResetAutoBtn type="button" onClick={() => updateStop(i, 'rainExpected', null)}>
                           Reset to Auto
                         </ResetAutoBtn>
                       )}
-                      {!s.climateOverride && inf && (
+                      {!isIndefiniteTravel && !s.climateOverride && inf && (
                         <FieldHint>
                           Auto: {inf.climate}{isAuto && inferredRain ? ', rain expected' : ''}
                         </FieldHint>
@@ -906,7 +933,7 @@ export default function Build() {
           </Card>
         ))}
 
-        <TextBtn onClick={addStop}>+ Add another stop</TextBtn>
+        {!isIndefiniteTravel && <TextBtn onClick={addStop}>+ Add another stop</TextBtn>}
 
         <Card style={{ marginTop: '16px' }}>
           <CardLabel>Gender</CardLabel>
