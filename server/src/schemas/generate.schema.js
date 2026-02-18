@@ -2,8 +2,8 @@ const { z } = require('zod');
 
 const stopSchema = z.object({
   countryOrRegion: z.string().min(1),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD').optional(),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD').optional(),
   climateOverride: z.enum(['cold', 'moderate', 'hot', 'mixed', 'rainy']).nullable().optional(),
   rainExpected: z.boolean().nullable().optional(),
 });
@@ -17,6 +17,7 @@ const generateInputSchema = z.object({
   workSetup: z.enum(['none', 'light', 'heavy']),
   gender: z.enum(['male', 'female', 'non-binary', 'prefer-not-to-say']),
   mustBringItems: z.array(z.string().min(1)).optional(),
+  indefinite: z.boolean().optional().default(false),
 });
 
 function validate(schema) {

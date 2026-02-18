@@ -14,6 +14,9 @@ import Plans from './pages/Plans';
 import PlanDetail from './pages/PlanDetail';
 import FAQ from './pages/FAQ';
 import About from './pages/About';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import Affiliate from './pages/Affiliate';
 import Legal from './pages/Legal';
 
 const STORAGE_KEY = 'carryonready-theme';
@@ -61,6 +64,9 @@ export default function App() {
                 <Route path="/plans/:id" element={<PlanDetail />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/affiliate" element={<Affiliate />} />
                 <Route path="/legal" element={<Legal />} />
               </Route>
             </Routes>

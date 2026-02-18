@@ -55,8 +55,8 @@ export default function Legal() {
         <SectionTitle>Contact</SectionTitle>
         <Text>
           Questions or issues? Reach us at{' '}
-          <EmailLink href="mailto:support@carryonready.app">
-            support@carryonready.app
+          <EmailLink href="mailto:colin.carryonready.app@proton.me">
+            colin.carryonready.app@proton.me
           </EmailLink>
           .
         </Text>

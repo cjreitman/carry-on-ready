@@ -17,13 +17,42 @@ function getBagTier(liters) {
 }
 
 function computeDerived(input) {
+  const indefinite = !!input.indefinite;
+  const bagTier = getBagTier(input.bagLiters);
+
+  // Passport recommendation: true if any destination differs from citizenship
+  const destinations = input.stops.map((s) => s.countryOrRegion);
+  const passportRecommended = destinations.some(
+    (dest) => dest && dest.trim().toLowerCase() !== input.citizenship.trim().toLowerCase()
+  );
+
+  // Indefinite mode: skip date-based logic, force mixed climate + rain
+  if (indefinite) {
+    const stopDaysList = input.stops.map((s) => ({ ...s, stopDays: 14 }));
+    return {
+      stopDaysList,
+      totalDays: 14,
+      bagTier,
+      climate: 'mixed',
+      laundry: input.laundry,
+      workSetup: input.workSetup,
+      rainExpected: true,
+      gender: input.gender,
+      citizenship: input.citizenship,
+      destinations,
+      passportRecommended,
+      indefinite: true,
+      inferredStopClimates: input.stops.map(() => 'mixed'),
+      inferredRainFlags: input.stops.map(() => true),
+    };
+  }
+
   const stopDaysList = input.stops.map((s) => ({
     ...s,
     stopDays: inclusiveDays(s),
   }));
 
   const totalDays = stopDaysList.reduce((sum, s) => sum + s.stopDays, 0);
-  const bagTier = getBagTier(input.bagLiters);
 
   // Per-stop climate/rain inference
   const inferredStopClimates = [];
@@ -55,12 +84,6 @@ function computeDerived(input) {
     if (s.rainExpected === false) return false;
     return inferredRainFlags[i] === true; // null/undefined = auto
   });
-
-  // Passport recommendation: true if any destination differs from citizenship
-  const destinations = input.stops.map((s) => s.countryOrRegion);
-  const passportRecommended = destinations.some(
-    (dest) => dest && dest.trim().toLowerCase() !== input.citizenship.trim().toLowerCase()
-  );
 
   return {
     stopDaysList,

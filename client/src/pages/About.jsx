@@ -15,12 +15,19 @@ const Paragraph = styled.p`
   }
 `;
 
+const Signature = styled.div`
+  margin-top: ${({ theme }) => theme.spacing.xl};
+  font-size: 0.85rem;
+  color: ${({ theme }) => theme.colors.textLight};
+  line-height: 1.6;
+`;
+
 export default function About() {
   return (
     <div>
       <Title>About</Title>
       <Paragraph>
-        Hi, I'm Colin. I'm a long-term carry-on traveler and software engineer.
+        Hi, I'm a long-term carry-on traveler and software engineer.
       </Paragraph>
       <Paragraph>
         I built Carry-On Ready after spending years refining my own one-bag setup
@@ -34,6 +41,9 @@ export default function About() {
         system that works. My goal is simple: help you pack lighter, smarter,
         with more confidence, and without overthinking every decision.
       </Paragraph>
+      <Signature>
+        <div>Colin</div>
+      </Signature>
     </div>
   );
 }

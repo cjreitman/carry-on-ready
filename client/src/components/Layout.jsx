@@ -54,12 +54,21 @@ const Footer = styled.footer`
   border-top: 1px solid ${({ theme }) => theme.colors.border};
   padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
   text-align: center;
-  font-size: 0.85rem;
   color: ${({ theme }) => theme.colors.textLight};
+`;
+
+const FooterLinks = styled.div`
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
+  gap: ${({ theme }) => theme.spacing.sm};
+  font-size: 0.75rem;
+`;
+
+const FooterByline = styled.div`
+  font-size: 0.7rem;
+  margin-top: 4px;
 `;
 
 export default function Layout() {
@@ -86,10 +95,15 @@ export default function Layout() {
         <Outlet />
       </Main>
       <Footer>
+        <FooterLinks>
           <span>Carry-On Ready</span>
-          <Link to="/legal">Legal</Link>
+          <Link to="/terms">Terms</Link>
+          <Link to="/privacy">Privacy</Link>
+          <Link to="/affiliate">Affiliate Disclosure</Link>
           <Link to="/legal#contact">Contact</Link>
-        </Footer>
+        </FooterLinks>
+        <FooterByline>Built by Colin</FooterByline>
+      </Footer>
     </>
   );
 }

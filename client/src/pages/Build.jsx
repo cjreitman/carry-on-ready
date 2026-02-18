@@ -602,6 +602,7 @@ export default function Build() {
 
   // Step 1 state
   const [citizenship, setCitizenship] = useState('');
+  const [indefinite, setIndefinite] = useState(false);
   const [stops, setStops] = useState([{ ...EMPTY_STOP }]);
   const [gender, setGender] = useState('');
   const [mustBringItems, setMustBringItems] = useState([]);
@@ -660,14 +661,16 @@ export default function Build() {
       if (!s.countryOrRegion.trim() || !isValidCountry(s.countryOrRegion)) {
         addError(`stop-${i}-country`, 'Please select a valid country.');
       }
-      if (!s.startDate) {
-        addError(`stop-${i}-startDate`, 'Required.');
-      }
-      if (!s.endDate) {
-        addError(`stop-${i}-endDate`, 'Required.');
-      }
-      if (s.startDate && s.endDate && s.endDate < s.startDate) {
-        addError(`stop-${i}-endDate`, 'End date must be on or after start date.');
+      if (!indefinite) {
+        if (!s.startDate) {
+          addError(`stop-${i}-startDate`, 'Required.');
+        }
+        if (!s.endDate) {
+          addError(`stop-${i}-endDate`, 'Required.');
+        }
+        if (s.startDate && s.endDate && s.endDate < s.startDate) {
+          addError(`stop-${i}-endDate`, 'End date must be on or after start date.');
+        }
       }
     }
 
@@ -726,8 +729,7 @@ export default function Build() {
       citizenship: citizenship.trim(),
       stops: stops.map((s) => ({
         countryOrRegion: s.countryOrRegion.trim(),
-        startDate: s.startDate,
-        endDate: s.endDate,
+        ...(indefinite ? {} : { startDate: s.startDate, endDate: s.endDate }),
         climateOverride: s.climateOverride || null,
         rainExpected: s.rainExpected,
       })),
@@ -736,6 +738,7 @@ export default function Build() {
       workSetup,
       gender,
       mustBringItems: mustBringItems.length > 0 ? mustBringItems : undefined,
+      indefinite: indefinite || undefined,
     };
 
     try {
@@ -777,6 +780,21 @@ export default function Build() {
           {fieldErrors.citizenship && <InlineError>{fieldErrors.citizenship}</InlineError>}
         </Card>
 
+        <Card>
+          <CheckboxRow>
+            <CheckboxInput
+              type="checkbox"
+              checked={indefinite}
+              onChange={() => setIndefinite((v) => !v)}
+            />
+            Indefinite / open-ended travel
+          </CheckboxRow>
+          <FieldHint>
+            When enabled, we assume mixed climates and possible rain, and
+            we'll recommend versatile layering essentials.
+          </FieldHint>
+        </Card>
+
         {stops.map((s, i) => (
           <Card key={i}>
             <StopHeader>
@@ -797,6 +815,7 @@ export default function Build() {
                 {fieldErrors[`stop-${i}-country`] && <InlineError>{fieldErrors[`stop-${i}-country`]}</InlineError>}
               </Field>
             </Row>
+            {!indefinite && (
             <Row>
               <Field>
                 Start Date
@@ -838,6 +857,7 @@ export default function Build() {
                 {fieldErrors[`stop-${i}-endDate`] && <InlineError>{fieldErrors[`stop-${i}-endDate`]}</InlineError>}
               </Field>
             </Row>
+            )}
             <Row>
               <Field>
                 Climate override
@@ -845,7 +865,7 @@ export default function Build() {
                   value={s.climateOverride}
                   onCommit={(val) => updateStop(i, 'climateOverride', val)}
                   options={[
-                    { value: '', label: (() => { const inf = inferClimateFromStop(s); return inf ? `Auto (${inf.climate})` : 'Auto (based on destination + dates)'; })() },
+                    { value: '', label: (() => { if (indefinite) return 'Auto (mixed)'; const inf = inferClimateFromStop(s); return inf ? `Auto (${inf.climate})` : 'Auto (based on destination + dates)'; })() },
                     ...CLIMATE_OPTIONS.map((c) => ({ value: c, label: c })),
                   ]}
                   placeholder="Select climate"
