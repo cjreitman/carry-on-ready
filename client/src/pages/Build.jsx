@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import api from '../utils/api';
 import COUNTRIES from '../utils/countries';
+import { inferClimateFromStop } from '../utils/climateHeuristics';
 
 // --- Styled pieces ---
 
@@ -18,8 +19,15 @@ const StepTitle = styled.h1`
 
 const StepSub = styled.p`
   color: ${({ theme }) => theme.colors.textLight};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
   font-size: 0.95rem;
+`;
+
+const PrefillBlurb = styled.p`
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.colors.textLight};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+  line-height: 1.4;
 `;
 
 const Card = styled.div`
@@ -76,6 +84,7 @@ const Select = styled.select`
   font-size: 0.95rem;
   background: ${({ theme }) => theme.colors.inputBg};
   color: ${({ theme }) => theme.colors.text};
+  width: 100%;
 `;
 
 const FieldHint = styled.span`
@@ -467,6 +476,7 @@ export default function Build() {
   const [submitting, setSubmitting] = useState(false);
 
   // Step 1 state
+  const [citizenship, setCitizenship] = useState('');
   const [stops, setStops] = useState([{ ...EMPTY_STOP }]);
   const [gender, setGender] = useState('');
   const [mustBringItems, setMustBringItems] = useState([]);
@@ -495,6 +505,9 @@ export default function Build() {
   // --- Validation ---
 
   function validateStep1() {
+    if (!citizenship || !isValidCountry(citizenship)) {
+      return 'Please select your citizenship (passport issuing country).';
+    }
     for (let i = 0; i < stops.length; i++) {
       const s = stops[i];
       if (!s.countryOrRegion.trim() || !isValidCountry(s.countryOrRegion)) {
@@ -549,6 +562,7 @@ export default function Build() {
     setSubmitting(true);
 
     const payload = {
+      citizenship: citizenship.trim(),
       stops: stops.map((s) => ({
         countryOrRegion: s.countryOrRegion.trim(),
         startDate: s.startDate,
@@ -585,8 +599,22 @@ export default function Build() {
       <Page>
         <StepTitle>Step 1: Your Trip</StepTitle>
         <StepSub>Add one or more stops to your itinerary.</StepSub>
+        <PrefillBlurb>
+          We prefill climate and rain expectations based on your destination and
+          travel dates. This is a best-guess estimate — you can override it at
+          any time.
+        </PrefillBlurb>
 
         {error && <ErrorMsg>{error}</ErrorMsg>}
+
+        <Card>
+          <CardLabel>Citizenship (passport issuer)</CardLabel>
+          <CountryAutocomplete
+            value={citizenship}
+            onCommit={(val) => setCitizenship(val)}
+            placeholder="e.g. United States"
+          />
+        </Card>
 
         {stops.map((s, i) => (
           <Card key={i}>
@@ -604,32 +632,6 @@ export default function Build() {
                   onCommit={(val) => updateStop(i, 'countryOrRegion', val)}
                   placeholder="e.g. France"
                 />
-              </Field>
-              <Field>
-                Climate
-                <Select
-                  value={s.climateOverride}
-                  onChange={(e) =>
-                    updateStop(i, 'climateOverride', e.target.value)
-                  }
-                >
-                  <option value="">—</option>
-                  {CLIMATE_OPTIONS.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </Select>
-                <CheckboxRow>
-                  <CheckboxInput
-                    type="checkbox"
-                    checked={s.rainExpected}
-                    onChange={(e) =>
-                      updateStop(i, 'rainExpected', e.target.checked)
-                    }
-                  />
-                  Rain expected
-                </CheckboxRow>
               </Field>
             </Row>
             <Row>
@@ -650,6 +652,51 @@ export default function Build() {
                   onChange={(e) => updateStop(i, 'endDate', e.target.value)}
                   onClick={(e) => e.target.showPicker?.()}
                 />
+              </Field>
+            </Row>
+            <Row>
+              <Field>
+                Climate override
+                <Select
+                  value={s.climateOverride}
+                  onChange={(e) =>
+                    updateStop(i, 'climateOverride', e.target.value)
+                  }
+                >
+                  <option value="">
+                    {(() => {
+                      const inf = inferClimateFromStop(s);
+                      return inf ? `Auto (${inf.climate})` : 'Auto (based on destination + dates)';
+                    })()}
+                  </option>
+                  {CLIMATE_OPTIONS.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </Select>
+                <CheckboxRow>
+                  <CheckboxInput
+                    type="checkbox"
+                    checked={s.rainExpected}
+                    onChange={(e) =>
+                      updateStop(i, 'rainExpected', e.target.checked)
+                    }
+                  />
+                  Rain expected
+                </CheckboxRow>
+                {!s.climateOverride && !s.rainExpected && (() => {
+                  const inf = inferClimateFromStop(s);
+                  if (!inf) return null;
+                  const parts = [`${inf.climate}`];
+                  if (inf.rainExpected) parts.push('rain expected');
+                  return <FieldHint>Auto: {parts.join(', ')}</FieldHint>;
+                })()}
+                {!s.climateOverride && s.rainExpected && (() => {
+                  const inf = inferClimateFromStop(s);
+                  if (!inf) return null;
+                  return <FieldHint>Auto: {inf.climate}</FieldHint>;
+                })()}
               </Field>
             </Row>
           </Card>

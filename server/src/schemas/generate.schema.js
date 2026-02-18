@@ -9,6 +9,7 @@ const stopSchema = z.object({
 });
 
 const generateInputSchema = z.object({
+  citizenship: z.string().min(1),
   stops: z.array(stopSchema).min(1, 'At least one stop is required'),
   bagLiters: z.number().positive(),
   climateOverall: z.enum(['cold', 'moderate', 'hot', 'mixed']).optional(),

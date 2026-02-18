@@ -57,6 +57,12 @@ module.exports = function clothingRule(ctx, draft) {
   socks = Math.max(3, socks);
   shirts = Math.max(3, shirts);
 
+  // Male-specific max: cap socks/underwear at 5 before tier caps
+  if (ctx.derived.gender === 'male') {
+    underwear = Math.min(underwear, 5);
+    socks = Math.min(socks, 5);
+  }
+
   // Store raw counts on draft for capping
   draft.clothingCounts = { shoes, pants, shirts, underwear, socks, midlayers: 0, outerwear: 0 };
 
