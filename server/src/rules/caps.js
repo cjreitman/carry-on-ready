@@ -6,22 +6,22 @@ const TIER_CAPS = {
   },
   TIGHT: {
     shoes: 2, pants: 1, shirts: 4,
-    underwear: 6, socks: 6,
+    underwear: 5, socks: 5,
     midlayers: 1, outerwear: 1,
   },
   STANDARD: {
     shoes: 2, pants: 2, shirts: 5,
-    underwear: 7, socks: 7,
+    underwear: 5, socks: 5,
     midlayers: 1, outerwear: 2,
   },
   MAX: {
     shoes: 2, pants: 2, shirts: 6,
-    underwear: 8, socks: 8,
+    underwear: 5, socks: 5,
     midlayers: 2, outerwear: 2,
   },
   OVERSIZE: {
     shoes: 2, pants: 2, shirts: 7,
-    underwear: 10, socks: 10,
+    underwear: 5, socks: 5,
     midlayers: 2, outerwear: 2,
   },
 };

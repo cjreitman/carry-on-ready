@@ -22,7 +22,7 @@ const Answer = styled.p`
 const faqs = [
   {
     q: 'What does Carry-On Ready do?',
-    a: 'It generates a packing checklist tailored to your trip length, climate, work setup, and bag size — optimized for carry-on-only travel.',
+    a: 'It generates a packing checklist tailored to your trip length, climate, work setup, and bag size. Optimized for carry-on-only travel.',
   },
   {
     q: 'How does bag size affect my checklist?',
@@ -30,15 +30,15 @@ const faqs = [
   },
   {
     q: 'What bag sizes work as carry-on?',
-    a: 'Most airlines allow 35–45L bags. Under 25L is ultra-light. Over 45L may exceed limits on some carriers — we\'ll warn you.',
+    a: 'Most airlines allow 35–45L bags. Under 25L is ultra-light. 40L is pushing it, and over 45L usually exceeds limits on some carriers — we\'ll warn you.',
   },
   {
     q: 'What does Pro unlock?',
-    a: 'Pro is a one-time $9 purchase. It lets you save plans, view them later, and export your checklist (copy, print, or PDF).',
+    a: 'Pro is a one-time $9 purchase. It lets you save plans, view them later, and export your checklist (copy, print, or PDF), and also as a way to say thanks for building this app :).',
   },
   {
     q: 'Do I need an account?',
-    a: 'No. Free users generate checklists without any account. Pro uses your email for payment and plan storage — no password needed.',
+    a: 'No. Free users generate checklists without any account. Pro uses your email for payment and plan storage. No password needed!',
   },
   {
     q: 'Can I edit the checklist?',
@@ -47,6 +47,14 @@ const faqs = [
   {
     q: 'Why merino wool?',
     a: 'Merino is naturally odor-resistant, moisture-wicking, and temperature-regulating. It lets you pack fewer items and wear them longer between washes.',
+  },
+  {
+    q: 'What do you think about jeans?',
+    a: 'I recommend agianst jeans. They\'re durable, for sure, but they simply don\'t pack down small enough for an efficient bag. I recommend hiking pants made of nylon/spendex.',
+  },
+  {
+    q: 'What kind of pack should I get?',
+    a: 'That I can\'t answer! But Google is your friend, here. Maybe in the future once I get some affiliates I can start recommending specific gear.',
   },
 ];
 
