@@ -49,10 +49,12 @@ function computeDerived(input) {
     }
   }
 
-  // Rain: user explicit true wins, else use inferred (unchecked does not block inference)
-  const rainExpected = input.stops.some(
-    (s, i) => s.rainExpected === true || inferredRainFlags[i] === true
-  );
+  // Rain: tri-state per stop (true = forced on, false = forced off, null/undefined = auto)
+  const rainExpected = input.stops.some((s, i) => {
+    if (s.rainExpected === true) return true;
+    if (s.rainExpected === false) return false;
+    return inferredRainFlags[i] === true; // null/undefined = auto
+  });
 
   // Passport recommendation: true if any destination differs from citizenship
   const destinations = input.stops.map((s) => s.countryOrRegion);

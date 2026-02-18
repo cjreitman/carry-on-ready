@@ -93,6 +93,18 @@ const FieldHint = styled.span`
   margin-top: 2px;
 `;
 
+const ResetAutoBtn = styled.button`
+  background: none;
+  border: none;
+  font-size: 0.72rem;
+  color: ${({ theme }) => theme.colors.primary};
+  padding: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  opacity: 0.7;
+  &:hover { opacity: 1; }
+`;
+
 const ButtonRow = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing.md};
@@ -454,7 +466,7 @@ const EMPTY_STOP = {
   startDate: '',
   endDate: '',
   climateOverride: '',
-  rainExpected: false,
+  rainExpected: null,
 };
 
 const CLIMATE_OPTIONS = ['cold', 'moderate', 'hot', 'mixed'];
@@ -568,7 +580,7 @@ export default function Build() {
         startDate: s.startDate,
         endDate: s.endDate,
         climateOverride: s.climateOverride || null,
-        rainExpected: s.rainExpected || false,
+        rainExpected: s.rainExpected,
       })),
       bagLiters: Number(bagLiters),
       laundry,
@@ -601,7 +613,7 @@ export default function Build() {
         <StepSub>Add one or more stops to your itinerary.</StepSub>
         <PrefillBlurb>
           We prefill climate and rain expectations based on your destination and
-          travel dates. This is a best-guess estimate — you can override it at
+          travel dates. This is a best-guess estimate, but you can override it at
           any time.
         </PrefillBlurb>
 
@@ -675,27 +687,36 @@ export default function Build() {
                     </option>
                   ))}
                 </Select>
-                <CheckboxRow>
-                  <CheckboxInput
-                    type="checkbox"
-                    checked={s.rainExpected}
-                    onChange={(e) =>
-                      updateStop(i, 'rainExpected', e.target.checked)
-                    }
-                  />
-                  Rain expected
-                </CheckboxRow>
-                {!s.climateOverride && !s.rainExpected && (() => {
+                {(() => {
                   const inf = inferClimateFromStop(s);
-                  if (!inf) return null;
-                  const parts = [`${inf.climate}`];
-                  if (inf.rainExpected) parts.push('rain expected');
-                  return <FieldHint>Auto: {parts.join(', ')}</FieldHint>;
-                })()}
-                {!s.climateOverride && s.rainExpected && (() => {
-                  const inf = inferClimateFromStop(s);
-                  if (!inf) return null;
-                  return <FieldHint>Auto: {inf.climate}</FieldHint>;
+                  const inferredRain = inf ? inf.rainExpected : false;
+                  const isAuto = s.rainExpected === null;
+                  const effectiveChecked = s.rainExpected === true || (isAuto && inferredRain);
+
+                  return (
+                    <>
+                      <CheckboxRow>
+                        <CheckboxInput
+                          type="checkbox"
+                          checked={effectiveChecked}
+                          onChange={() => {
+                            updateStop(i, 'rainExpected', effectiveChecked ? false : true);
+                          }}
+                        />
+                        Rain expected
+                      </CheckboxRow>
+                      {s.rainExpected !== null && (
+                        <ResetAutoBtn type="button" onClick={() => updateStop(i, 'rainExpected', null)}>
+                          Reset to Auto
+                        </ResetAutoBtn>
+                      )}
+                      {!s.climateOverride && inf && (
+                        <FieldHint>
+                          Auto: {inf.climate}{isAuto && inferredRain ? ', rain expected' : ''}
+                        </FieldHint>
+                      )}
+                    </>
+                  );
                 })()}
               </Field>
             </Row>
