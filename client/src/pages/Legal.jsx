@@ -38,23 +38,10 @@ export default function Legal() {
         </Text>
       </Section>
 
-      <Section>
-        <SectionTitle>Pricing</SectionTitle>
-        <Text>$9 one-time payment. No subscriptions.</Text>
-      </Section>
-
-      <Section>
-        <SectionTitle>Refund Policy</SectionTitle>
-        <Text>
-          If you're not satisfied, email us within 30 days for a full refund. No
-          questions asked.
-        </Text>
-      </Section>
-
       <Section id="contact">
         <SectionTitle>Contact</SectionTitle>
         <Text>
-          Questions or issues? Reach us at{' '}
+          Questions or comments? Reach me at{' '}
           <EmailLink href="mailto:colin.carryonready.app@proton.me">
             colin.carryonready.app@proton.me
           </EmailLink>
