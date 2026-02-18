@@ -136,6 +136,7 @@ export default function Unlock() {
         <li>Copy checklist to clipboard</li>
         <li>Print-optimized export</li>
         <li>Save plans (coming soon)</li>
+        <li>Buy me a couple beers</li>
       </Features>
       <Card>
         {error && <ErrorMsg>{error}</ErrorMsg>}

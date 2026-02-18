@@ -3,6 +3,10 @@
     {
       "source": "/api/(.*)",
       "destination": "https://carry-on-ready.onrender.com/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
