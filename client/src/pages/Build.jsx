@@ -217,66 +217,10 @@ const DropdownItem = styled.li`
 
 // --- Tag input styles ---
 
-const TagWrap = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 6px 8px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 4px;
-  background: ${({ theme }) => theme.colors.inputBg};
-  min-height: 38px;
-  align-items: center;
-  cursor: text;
-`;
-
-const Tag = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.82rem;
-  background: ${({ theme }) => theme.colors.primary}22;
-  color: ${({ theme }) => theme.colors.primary};
-  white-space: nowrap;
-`;
-
-const TagRemove = styled.button`
-  background: none;
-  border: none;
-  color: ${({ theme }) => theme.colors.primary};
-  font-size: 0.9rem;
-  line-height: 1;
-  padding: 0;
-  cursor: pointer;
-  opacity: 0.6;
-
-  &:hover {
-    opacity: 1;
-  }
-`;
-
-const TagInput = styled.input`
-  border: none;
-  outline: none;
-  font-size: 0.9rem;
-  flex: 1;
-  min-width: 80px;
-  background: transparent;
-  color: ${({ theme }) => theme.colors.text};
-`;
-
 const CardLabel = styled.div`
   font-size: 0.85rem;
   color: ${({ theme }) => theme.colors.textLight};
   margin-bottom: 4px;
-`;
-
-const CardHint = styled.p`
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.textLight};
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;
 
 // --- Gender pill styles ---
@@ -884,7 +828,6 @@ export default function Build() {
   const [isIndefiniteTravel, setIsIndefiniteTravel] = useState(false);
   const [stops, setStops] = useState([{ ...EMPTY_STOP }]);
   const [gender, setGender] = useState('');
-  const [mustBringItems, setMustBringItems] = useState([]);
 
   // Step 2 state
   const [bagLiters, setBagLiters] = useState(35);
@@ -1040,7 +983,6 @@ export default function Build() {
       laundry,
       workSetup,
       gender,
-      mustBringItems: mustBringItems.length > 0 ? mustBringItems : undefined,
       isIndefiniteTravel: isIndefiniteTravel || undefined,
       forcePassportRecommended: isIndefiniteTravel || undefined,
     };
@@ -1230,52 +1172,6 @@ export default function Build() {
           </div>
         </Card>
 
-        <Card style={{ marginTop: '16px' }}>
-          <CardLabel>Must-bring items (optional)</CardLabel>
-          <CardHint>
-            Add any event-specific or required gear (e.g. skates, wedding outfit, running shoes).
-          </CardHint>
-          <TagWrap onClick={(e) => {
-            const input = e.currentTarget.querySelector('input');
-            if (input) input.focus();
-          }}>
-            {mustBringItems.map((item) => (
-              <Tag key={item}>
-                {item}
-                <TagRemove
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMustBringItems((prev) => prev.filter((t) => t !== item));
-                  }}
-                >
-                  &times;
-                </TagRemove>
-              </Tag>
-            ))}
-            <TagInput
-              placeholder={mustBringItems.length === 0 ? 'Type and press Enter' : ''}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ',') {
-                  e.preventDefault();
-                  const val = e.target.value.replace(/,/g, '').trim();
-                  if (val && !mustBringItems.some((t) => t.toLowerCase() === val.toLowerCase())) {
-                    setMustBringItems((prev) => [...prev, val]);
-                  }
-                  e.target.value = '';
-                } else if (e.key === 'Backspace' && !e.target.value && mustBringItems.length > 0) {
-                  setMustBringItems((prev) => prev.slice(0, -1));
-                }
-              }}
-              onBlur={(e) => {
-                const val = e.target.value.replace(/,/g, '').trim();
-                if (val && !mustBringItems.some((t) => t.toLowerCase() === val.toLowerCase())) {
-                  setMustBringItems((prev) => [...prev, val]);
-                }
-                e.target.value = '';
-              }}
-            />
-          </TagWrap>
-        </Card>
 
         <ButtonRow>
           <PrimaryBtn onClick={goToStep2}>Continue</PrimaryBtn>
