@@ -106,7 +106,7 @@ export default function Layout() {
         </FooterLinks>
         <FooterByline>
           Built by Colin. If this saved you time, you can{' '}
-          <CoffeeLink href="https://buymeacoffee.com/cjreitman" target="_blank" rel="noopener noreferrer">
+          <CoffeeLink href="https://buymeacoffee.com/cjreitman" target="_blank" rel="noopener noreferrer" onClick={() => { if (window.umami) window.umami.track('Buy Me a Coffee Clicked'); }}>
             buy me a coffee
           </CoffeeLink>.
         </FooterByline>

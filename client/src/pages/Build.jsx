@@ -1008,6 +1008,7 @@ export default function Build() {
     }
     setError('');
     setFieldErrors({});
+    if (window.umami) window.umami.track('Step 1 Completed');
     setStep(2);
   }
 
@@ -1046,6 +1047,7 @@ export default function Build() {
 
     try {
       const { data } = await api.post('/generate', payload);
+      if (window.umami) window.umami.track('Step 2 Completed');
       navigate('/results', { state: { result: data, inputs: payload } });
     } catch (e) {
       console.log(e)

@@ -843,6 +843,11 @@ export default function Results() {
     return ids;
   }, [items, capacityState]);
 
+  useEffect(() => {
+    if (!result) return;
+    if (window.umami) window.umami.track('Results Generated');
+  }, [result]);
+
   if (!result) {
     return (
       <EmptyState>
@@ -857,6 +862,7 @@ export default function Results() {
   const sections = groupBySection(items);
 
   async function handleCopy() {
+    if (window.umami) window.umami.track('Checklist Copied');
     await copyChecklistToClipboard(items, derived, inputs, notes);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
