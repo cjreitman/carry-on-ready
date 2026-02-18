@@ -75,6 +75,7 @@ export default function Layout() {
             <Link to="/build">Build</Link>
             {isPro && <Link to="/plans">Plans</Link>}
             <Link to="/faq">FAQ</Link>
+            <Link to="/about">About</Link>
             <ThemeToggle onClick={toggle} title="Toggle theme">
               {mode === 'light' ? '\u{1F319}' : '\u{2600}\u{FE0F}'}
             </ThemeToggle>

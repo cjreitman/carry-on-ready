@@ -26,11 +26,11 @@ const faqs = [
   },
   {
     q: 'How does bag size affect my checklist?',
-    a: 'Your bag volume (in liters) determines a tier (Ultra, Tight, Standard, Max, or Oversize). Each tier caps clothing counts so everything actually fits.',
+    a: 'Your bag volume (in liters) determines a tier. Each tier caps clothing counts so everything actually fits.',
   },
   {
     q: 'What bag sizes work as carry-on?',
-    a: 'Most airlines allow 35–45L bags. Under 25L is ultra-light. 40L is pushing it, and over 45L usually exceeds limits on some carriers — we\'ll warn you.',
+    a: 'Most airlines consider 30–40L bags to be carry-on. Under 25L is ultra-light. 40L is pushing it, and over 45L exceeds limits on some carriers.',
   },
   {
     q: 'What does Pro unlock?',

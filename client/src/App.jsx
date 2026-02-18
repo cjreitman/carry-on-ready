@@ -13,6 +13,7 @@ import Success from './pages/Success';
 import Plans from './pages/Plans';
 import PlanDetail from './pages/PlanDetail';
 import FAQ from './pages/FAQ';
+import About from './pages/About';
 import Legal from './pages/Legal';
 
 const STORAGE_KEY = 'carryonready-theme';
@@ -59,6 +60,7 @@ export default function App() {
                 <Route path="/plans" element={<Plans />} />
                 <Route path="/plans/:id" element={<PlanDetail />} />
                 <Route path="/faq" element={<FAQ />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/legal" element={<Legal />} />
               </Route>
             </Routes>
