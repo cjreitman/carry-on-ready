@@ -13,7 +13,7 @@ const VOLUME_PROFILE = {
   underwear_merino: 0.18,
   underwear_standard: 0.22,
   bra_sports_light: 0.25,
-  socks_merino: 0.15,
+  socks_merino: 0.30,
   socks_standard: 0.18,
 
   // Bottoms
