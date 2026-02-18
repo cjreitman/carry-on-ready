@@ -5,15 +5,13 @@ const helmet = require('helmet');
 const connectDB = require('./config/db');
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4001;
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
 const generateRouter = require('./routes/generate');
-const stripeRouter = require('./routes/stripe');
-const proRouter = require('./routes/pro');
 const plansRouter = require('./routes/plans');
 
 app.get('/api/health', (_req, res) => {
@@ -21,8 +19,6 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/generate', generateRouter);
-app.use('/api/stripe', stripeRouter);
-app.use('/api/pro', proRouter);
 app.use('/api/plans', plansRouter);
 
 const server = app.listen(PORT, () => {

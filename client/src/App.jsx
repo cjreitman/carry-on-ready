@@ -3,15 +3,10 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from './styles/theme';
 import GlobalStyles from './styles/GlobalStyles';
-import { ProProvider } from './context/ProContext';
 import Layout from './components/Layout';
 import Landing from './pages/Landing';
 import Build from './pages/Build';
 import Results from './pages/Results';
-import Unlock from './pages/Unlock';
-import Success from './pages/Success';
-import Plans from './pages/Plans';
-import PlanDetail from './pages/PlanDetail';
 import FAQ from './pages/FAQ';
 import About from './pages/About';
 import Terms from './pages/Terms';
@@ -51,27 +46,21 @@ export default function App() {
     <ThemeModeContext.Provider value={{ mode, toggle }}>
       <ThemeProvider theme={theme}>
         <GlobalStyles />
-        <ProProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Landing />} />
-                <Route path="/build" element={<Build />} />
-                <Route path="/results" element={<Results />} />
-                <Route path="/unlock" element={<Unlock />} />
-                <Route path="/success" element={<Success />} />
-                <Route path="/plans" element={<Plans />} />
-                <Route path="/plans/:id" element={<PlanDetail />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/affiliate" element={<Affiliate />} />
-                <Route path="/legal" element={<Legal />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </ProProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Landing />} />
+              <Route path="/build" element={<Build />} />
+              <Route path="/results" element={<Results />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/affiliate" element={<Affiliate />} />
+              <Route path="/legal" element={<Legal />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
       </ThemeProvider>
     </ThemeModeContext.Provider>
   );

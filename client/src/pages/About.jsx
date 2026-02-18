@@ -41,6 +41,11 @@ export default function About() {
         system that works. My goal is simple: help you pack lighter, smarter,
         with more confidence, and without overthinking every decision.
       </Paragraph>
+      <Paragraph>
+        If Carry-On Ready has helped you travel lighter or think more clearly about
+        your setup, you can support the project{' '}
+        <a href="https://buymeacoffee.com/colin" target="_blank" rel="noopener noreferrer">here</a>.
+      </Paragraph>
       <Signature>
         <div>Colin</div>
       </Signature>

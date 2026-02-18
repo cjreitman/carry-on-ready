@@ -39,10 +39,6 @@ export default function Privacy() {
       <BulletList>
         <li>Information you input into the app (trip details, preferences)</li>
         <li>Anonymous usage data (if analytics are enabled)</li>
-        <li>
-          Payment information via Stripe (Stripe processes payments directly — we
-          do not store card data)
-        </li>
       </BulletList>
       <Paragraph>We do not sell personal data.</Paragraph>
 
@@ -51,7 +47,6 @@ export default function Privacy() {
       <BulletList>
         <li>Generate packing recommendations</li>
         <li>Improve the app</li>
-        <li>Process payments</li>
       </BulletList>
       <Paragraph>
         If analytics tools are used, they may collect anonymous traffic data
@@ -61,7 +56,6 @@ export default function Privacy() {
       <SubHeading>Third Parties</SubHeading>
       <Paragraph>We may use:</Paragraph>
       <BulletList>
-        <li>Stripe (payment processing)</li>
         <li>Hosting providers (e.g., Vercel, Render)</li>
         <li>Analytics providers (if enabled)</li>
       </BulletList>

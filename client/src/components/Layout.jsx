@@ -1,6 +1,5 @@
 import { Outlet, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import usePro from '../context/ProContext';
 import { useThemeMode } from '../App';
 
 const Nav = styled.nav`
@@ -71,8 +70,13 @@ const FooterByline = styled.div`
   margin-top: 4px;
 `;
 
+const CoffeeLink = styled.a`
+  color: ${({ theme }) => theme.colors.textLight};
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+`;
+
 export default function Layout() {
-  const { isPro } = usePro();
   const { mode, toggle } = useThemeMode();
 
   return (
@@ -82,7 +86,6 @@ export default function Layout() {
           <Logo to="/">Carry-On Ready</Logo>
           <NavLinks>
             <Link to="/build">Build</Link>
-            {isPro && <Link to="/plans">Plans</Link>}
             <Link to="/faq">FAQ</Link>
             <Link to="/about">About</Link>
             <ThemeToggle onClick={toggle} title="Toggle theme">
@@ -102,7 +105,12 @@ export default function Layout() {
           <Link to="/affiliate">Affiliate Disclosure</Link>
           <Link to="/legal#contact">Contact</Link>
         </FooterLinks>
-        <FooterByline>Built by Colin</FooterByline>
+        <FooterByline>
+          Built by Colin. If this saved you time, you can{' '}
+          <CoffeeLink href="https://buymeacoffee.com/colin" target="_blank" rel="noopener noreferrer">
+            buy me a coffee
+          </CoffeeLink>.
+        </FooterByline>
       </Footer>
     </>
   );

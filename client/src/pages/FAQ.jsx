@@ -33,16 +33,12 @@ const faqs = [
     a: 'Most airlines consider 30–40L bags to be carry-on. Under 25L is ultra-light. 40L is pushing it, and over 45L exceeds limits on some carriers.',
   },
   {
-    q: 'What does Pro unlock?',
-    a: 'Pro is a one-time $9 purchase. It lets you save plans, view them later, and export your checklist (copy, print, or PDF), and also as a way to say thanks for building this app :).',
-  },
-  {
     q: 'Do I need an account?',
-    a: 'No. Free users generate checklists without any account. Pro uses your email for payment and plan storage. No password needed!',
+    a: 'No. You generate checklists without any account or sign-up.',
   },
   {
     q: 'Can I edit the checklist?',
-    a: 'Yes. You can rename items, remove them, or add your own. Edits are saved when you save a plan (Pro).',
+    a: 'Yes. You can rename items, remove them, or add your own.',
   },
   {
     q: 'Why merino wool?',

@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import useChecklist from '../hooks/useChecklist';
-import usePro from '../context/ProContext';
 import { copyChecklistToClipboard, printChecklist } from '../utils/export';
 import api from '../utils/api';
 import InfoTooltip from '../components/InfoTooltip';
@@ -463,10 +462,6 @@ const NoteFooter = styled.p`
   padding-left: ${({ theme }) => theme.spacing.md};
 `;
 
-const ProHint = styled.span`
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.textLight};
-`;
 
 const BackLink = styled(Link)`
   display: inline-block;
@@ -757,8 +752,6 @@ function getSectionOrder(originalChecklist) {
 
 export default function Results() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { isPro } = usePro();
   const result = location.state?.result;
   const inputs = location.state?.inputs;
 
@@ -844,20 +837,12 @@ export default function Results() {
   const sections = groupBySection(items);
 
   async function handleCopy() {
-    if (!isPro) {
-      navigate('/unlock');
-      return;
-    }
     await copyChecklistToClipboard(items, derived, inputs, notes);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
   function handlePrint() {
-    if (!isPro) {
-      navigate('/unlock');
-      return;
-    }
     printChecklist();
   }
 
@@ -905,10 +890,9 @@ export default function Results() {
         <ExportBar data-print-hide>
           {copied && <CopiedMsg>Copied!</CopiedMsg>}
           {saved && <CopiedMsg>Saved!</CopiedMsg>}
-          {!isPro && <ProHint>Unlock Pro to export</ProHint>}
           <ExportBtn onClick={handleCopy}>Copy</ExportBtn>
           <ExportBtn onClick={handlePrint}>Print</ExportBtn>
-          {isPro && <ExportBtn onClick={handleSave}>Save</ExportBtn>}
+          <ExportBtn onClick={handleSave}>Save</ExportBtn>
         </ExportBar>
       </Header>
 
