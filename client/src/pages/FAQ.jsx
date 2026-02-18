@@ -50,7 +50,7 @@ const faqs = [
   },
   {
     q: 'What do you think about jeans?',
-    a: 'I recommend agianst jeans. They\'re durable, for sure, but they simply don\'t pack down small enough for an efficient bag. I recommend hiking pants made of nylon/spendex.',
+    a: 'I recommend against jeans. They\'re durable, for sure, but they simply don\'t pack down small enough for an efficient bag. I recommend hiking pants made of nylon/spendex.',
   },
   {
     q: 'What kind of pack should I get?',

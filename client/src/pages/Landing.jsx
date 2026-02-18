@@ -59,14 +59,11 @@ const Tagline = styled.p`
 export default function Landing() {
   return (
     <Hero>
-      <Headline>Pack 30 Days Into a 35L Carry-On — Without Guessing.</Headline>
+      <Headline>Pack 30 Days Into a 35L Carry-On Without Guessing.</Headline>
       <Subhead>
         Carry-On Ready generates a capacity-aware packing checklist based on your
         trip length, climate, and work setup.
       </Subhead>
-      <Supporting>
-        Optimized for 25–40L backpacks and long stays.
-      </Supporting>
       <CTA to="/build">Generate My Carry-On Plan</CTA>
       <HelperText>No account required. Takes 60 seconds.</HelperText>
       <Tagline>Keep calm and Carry-On.</Tagline>

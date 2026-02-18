@@ -158,6 +158,12 @@ const ErrorMsg = styled.p`
   margin-bottom: ${({ theme }) => theme.spacing.md};
 `;
 
+const InlineError = styled.span`
+  color: ${({ theme }) => theme.colors.warning};
+  font-size: 0.75rem;
+  margin-top: 2px;
+`;
+
 const StopHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -329,7 +335,7 @@ function resolveCanonical(val) {
 
 // --- Autocomplete component ---
 
-function CountryAutocomplete({ value, onCommit, placeholder }) {
+function CountryAutocomplete({ value, onCommit, placeholder, inputId }) {
   const [inputText, setInputText] = useState(value);
   const [open, setOpen] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
@@ -425,6 +431,7 @@ function CountryAutocomplete({ value, onCommit, placeholder }) {
   return (
     <AutocompleteWrap ref={wrapRef}>
       <Input
+        id={inputId}
         value={inputText}
         onChange={(e) => {
           setInputText(e.target.value);
@@ -485,6 +492,7 @@ export default function Build() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   // Step 1 state
@@ -508,34 +516,61 @@ export default function Build() {
 
   function addStop() {
     setStops((prev) => [...prev, { ...EMPTY_STOP }]);
+    setFieldErrors({});
   }
 
   function removeStop(index) {
     setStops((prev) => prev.filter((_, i) => i !== index));
+    setFieldErrors({});
+  }
+
+  function clearFieldError(key) {
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   }
 
   // --- Validation ---
 
-  function validateStep1() {
-    if (!citizenship || !isValidCountry(citizenship)) {
-      return 'Please select your citizenship (passport issuing country).';
+  function validateStep1Detailed() {
+    const errors = {};
+    let firstKey = null;
+
+    function addError(key, msg) {
+      if (!errors[key]) {
+        errors[key] = msg;
+        if (!firstKey) firstKey = key;
+      }
     }
+
+    if (!citizenship || !isValidCountry(citizenship)) {
+      addError('citizenship', 'Please select a valid country.');
+    }
+
     for (let i = 0; i < stops.length; i++) {
       const s = stops[i];
       if (!s.countryOrRegion.trim() || !isValidCountry(s.countryOrRegion)) {
-        return `Stop ${i + 1}: Please select a valid country from the list.`;
+        addError(`stop-${i}-country`, 'Please select a valid country.');
       }
-      if (!s.startDate || !s.endDate) {
-        return `Stop ${i + 1}: Start and end dates are required.`;
+      if (!s.startDate) {
+        addError(`stop-${i}-startDate`, 'Required.');
       }
-      if (s.endDate < s.startDate) {
-        return `Stop ${i + 1}: End date must be on or after start date.`;
+      if (!s.endDate) {
+        addError(`stop-${i}-endDate`, 'Required.');
+      }
+      if (s.startDate && s.endDate && s.endDate < s.startDate) {
+        addError(`stop-${i}-endDate`, 'End date must be on or after start date.');
       }
     }
+
     if (!gender) {
-      return 'Please select a gender option.';
+      addError('gender', 'Please select a gender.');
     }
-    return '';
+
+    return { errors, firstKey };
   }
 
   function validateStep2() {
@@ -548,12 +583,21 @@ export default function Build() {
   // --- Navigation ---
 
   function goToStep2() {
-    const err = validateStep1();
-    if (err) {
-      setError(err);
+    const { errors, firstKey } = validateStep1Detailed();
+    setFieldErrors(errors);
+    if (firstKey) {
+      setError('');
+      requestAnimationFrame(() => {
+        const el = document.getElementById(`field-${firstKey}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.focus?.();
+        }
+      });
       return;
     }
     setError('');
+    setFieldErrors({});
     setStep(2);
   }
 
@@ -617,15 +661,15 @@ export default function Build() {
           any time.
         </PrefillBlurb>
 
-        {error && <ErrorMsg>{error}</ErrorMsg>}
-
         <Card>
           <CardLabel>Citizenship (passport issuer)</CardLabel>
           <CountryAutocomplete
             value={citizenship}
-            onCommit={(val) => setCitizenship(val)}
+            onCommit={(val) => { setCitizenship(val); clearFieldError('citizenship'); }}
             placeholder="e.g. United States"
+            inputId="field-citizenship"
           />
+          {fieldErrors.citizenship && <InlineError>{fieldErrors.citizenship}</InlineError>}
         </Card>
 
         {stops.map((s, i) => (
@@ -641,29 +685,51 @@ export default function Build() {
                 Country / Region
                 <CountryAutocomplete
                   value={s.countryOrRegion}
-                  onCommit={(val) => updateStop(i, 'countryOrRegion', val)}
+                  onCommit={(val) => { updateStop(i, 'countryOrRegion', val); clearFieldError(`stop-${i}-country`); }}
                   placeholder="e.g. France"
+                  inputId={`field-stop-${i}-country`}
                 />
+                {fieldErrors[`stop-${i}-country`] && <InlineError>{fieldErrors[`stop-${i}-country`]}</InlineError>}
               </Field>
             </Row>
             <Row>
               <Field>
                 Start Date
                 <DateInput
+                  id={`field-stop-${i}-startDate`}
                   type="date"
                   value={s.startDate}
-                  onChange={(e) => updateStop(i, 'startDate', e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    updateStop(i, 'startDate', val);
+                    clearFieldError(`stop-${i}-startDate`);
+                    clearFieldError(`stop-${i}-endDate`);
+                    if (val && s.endDate && s.endDate < val) {
+                      setFieldErrors((prev) => ({ ...prev, [`stop-${i}-endDate`]: 'End date must be on or after start date.' }));
+                    }
+                  }}
                   onClick={(e) => e.target.showPicker?.()}
                 />
+                {fieldErrors[`stop-${i}-startDate`] && <InlineError>{fieldErrors[`stop-${i}-startDate`]}</InlineError>}
               </Field>
               <Field>
                 End Date
                 <DateInput
+                  id={`field-stop-${i}-endDate`}
                   type="date"
                   value={s.endDate}
-                  onChange={(e) => updateStop(i, 'endDate', e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    updateStop(i, 'endDate', val);
+                    clearFieldError(`stop-${i}-startDate`);
+                    clearFieldError(`stop-${i}-endDate`);
+                    if (s.startDate && val && val < s.startDate) {
+                      setFieldErrors((prev) => ({ ...prev, [`stop-${i}-endDate`]: 'End date must be on or after start date.' }));
+                    }
+                  }}
                   onClick={(e) => e.target.showPicker?.()}
                 />
+                {fieldErrors[`stop-${i}-endDate`] && <InlineError>{fieldErrors[`stop-${i}-endDate`]}</InlineError>}
               </Field>
             </Row>
             <Row>
@@ -727,18 +793,21 @@ export default function Build() {
 
         <Card style={{ marginTop: '16px' }}>
           <CardLabel>Gender</CardLabel>
-          <PillRow>
-            {GENDER_OPTIONS.map((g) => (
-              <GenderPill
-                key={g.value}
-                type="button"
-                $active={gender === g.value}
-                onClick={() => setGender(g.value)}
-              >
-                {g.label}
-              </GenderPill>
-            ))}
-          </PillRow>
+          <div id="field-gender">
+            <PillRow>
+              {GENDER_OPTIONS.map((g) => (
+                <GenderPill
+                  key={g.value}
+                  type="button"
+                  $active={gender === g.value}
+                  onClick={() => { setGender(g.value); clearFieldError('gender'); }}
+                >
+                  {g.label}
+                </GenderPill>
+              ))}
+            </PillRow>
+            {fieldErrors.gender && <InlineError>{fieldErrors.gender}</InlineError>}
+          </div>
         </Card>
 
         <Card style={{ marginTop: '16px' }}>
