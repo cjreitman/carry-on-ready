@@ -3,7 +3,6 @@ import { useLocation, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import useChecklist from '../hooks/useChecklist';
 import { copyChecklistToClipboard, printChecklist } from '../utils/export';
-import api from '../utils/api';
 import InfoTooltip from '../components/InfoTooltip';
 
 // --- Tooltip copy ---
@@ -21,6 +20,8 @@ const ITEM_TOOLTIPS = {
     'Use 100ml TSA-compliant containers to stay carry-on legal.',
   'health-meds':
     'Verify prescriptions are legal in your destination countries.',
+  'health-feminine-hygiene':
+    'Pack what fits your routine (tampons, pads, liner, cup, etc.).',
   'res-packbags':
     'Compression packing cubes can reduce volume by 20–30%.',
   'res-waterbottle':
@@ -47,6 +48,10 @@ const PageWrap = styled.div`
 const MainContent = styled.div`
   flex: 1;
   min-width: 0;
+
+  @media (max-width: 768px) {
+    order: 1;
+  }
 `;
 
 const SidePanel = styled.div`
@@ -57,7 +62,13 @@ const SidePanel = styled.div`
 
   @media (max-width: 768px) {
     width: 100%;
-    position: static;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    order: 0;
+    background: ${({ theme }) => theme.colors.bg};
+    padding-bottom: ${({ theme }) => theme.spacing.sm};
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   }
 
   @media print {
@@ -111,6 +122,12 @@ const SummaryBar = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius};
   padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
   margin-bottom: ${({ theme }) => theme.spacing.sm};
+
+  @media (max-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+    gap: ${({ theme }) => theme.spacing.sm};
+    margin-bottom: 0;
+  }
 `;
 
 const SummaryItem = styled.div`
@@ -126,6 +143,10 @@ const SummaryNote = styled.p`
   font-size: 0.8rem;
   color: ${({ theme }) => theme.colors.textLight};
   margin-bottom: ${({ theme }) => theme.spacing.lg};
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const BagSizeInput = styled.input`
@@ -760,7 +781,6 @@ export default function Results() {
   );
 
   const [copied, setCopied] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [addOnsExpanded, setAddOnsExpanded] = useState(true);
   const [optionalAddOns] = useState(() => result?.optionalAddOns || []);
   const [localBagLiters, setLocalBagLiters] = useState(() => inputs?.bagLiters || 35);
@@ -858,24 +878,6 @@ export default function Results() {
     });
   }
 
-  async function handleSave() {
-    const title = window.prompt('Name this plan:', `Trip — ${derived.totalDays} days`);
-    if (!title) return;
-
-    try {
-      await api.post('/plans', {
-        title,
-        inputs,
-        checklistSnapshot: items,
-        rulesVersion: result.rulesVersion,
-      });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch {
-      alert('Failed to save plan. Please try again.');
-    }
-  }
-
   // Split notes
   const principleIdx = notes.indexOf('--- Carry-on Principles ---');
   const rawTips = principleIdx >= 0 ? notes.slice(0, principleIdx) : notes;
@@ -889,10 +891,8 @@ export default function Results() {
         <Title>Your Packing Checklist</Title>
         <ExportBar data-print-hide>
           {copied && <CopiedMsg>Copied!</CopiedMsg>}
-          {saved && <CopiedMsg>Saved!</CopiedMsg>}
           <ExportBtn onClick={handleCopy}>Copy</ExportBtn>
           <ExportBtn onClick={handlePrint}>Print</ExportBtn>
-          <ExportBtn onClick={handleSave}>Save</ExportBtn>
         </ExportBar>
       </Header>
 

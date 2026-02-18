@@ -78,6 +78,7 @@ const VOLUME_PROFILE = {
   nail_clipper: 0.03,
   toothbrush: 0.05,
   hairbrush_compact: 0.20,
+  feminine_hygiene_kit: 0.15,
 
   // Resilience / organization
   packing_cubes_set_2: 1.00,
@@ -175,6 +176,7 @@ const ITEM_VOLUME_MAP = {
   'health-ziploc': 'ziplocks_set',
   'health-toothbrush': 'toothbrush',
   'health-hairbrush': 'hairbrush_compact',
+  'health-feminine-hygiene': 'feminine_hygiene_kit',
 
   // Resilience
   'res-lock': 'lock',

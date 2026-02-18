@@ -23,6 +23,13 @@ module.exports = function healthRule(ctx, draft) {
     );
   }
 
+  // Feminine hygiene products
+  if (gender === 'female') {
+    draft.items.push(
+      { id: 'health-feminine-hygiene', section: 'Health', label: 'Feminine hygiene products', count: 1, packed: false }
+    );
+  }
+
   if (ctx.derived.climate === 'hot') {
     draft.items.push(
       { id: 'health-rehydration', section: 'Health', label: 'Electrolyte packets', count: 1, packed: false }
