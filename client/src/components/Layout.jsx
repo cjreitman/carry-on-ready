@@ -72,8 +72,7 @@ const FooterByline = styled.div`
 
 const CoffeeLink = styled.a`
   color: ${({ theme }) => theme.colors.textLight};
-  text-decoration: none;
-  &:hover { text-decoration: underline; }
+  text-decoration: underline;
 `;
 
 export default function Layout() {
