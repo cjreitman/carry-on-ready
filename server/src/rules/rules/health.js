@@ -11,10 +11,6 @@ module.exports = function healthRule(ctx, draft) {
     { id: 'health-nailclipper', section: 'Health', label: 'Nail clipper', count: 1, packed: false }
   );
 
-  draft.items.push(
-    { id: 'rec-sleep-kit', section: 'Health', label: 'Sleep kit (eye mask + earplugs)', count: 1, packed: false }
-  );
-
   // Hairbrush: essential for female / non-binary, optional otherwise
   const gender = ctx.derived.gender;
   if (gender === 'female' || gender === 'non-binary') {
@@ -27,12 +23,6 @@ module.exports = function healthRule(ctx, draft) {
   if (gender === 'female') {
     draft.items.push(
       { id: 'health-feminine-hygiene', section: 'Health', label: 'Feminine hygiene products', count: 1, packed: false }
-    );
-  }
-
-  if (ctx.derived.climate === 'hot') {
-    draft.items.push(
-      { id: 'health-rehydration', section: 'Health', label: 'Electrolyte packets', count: 1, packed: false }
     );
   }
 

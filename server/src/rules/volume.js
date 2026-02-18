@@ -25,7 +25,7 @@ const VOLUME_PROFILE = {
   leggings_compressive: 0.90,
   skirt_light: 0.80,
   dress_packable: 1.20,
-  swim_trunks: 0.35,
+  swim_trunks: 0.75,
   swimsuit_one_piece: 0.45,
   swimsuit_two_piece: 0.35,
 
@@ -69,19 +69,23 @@ const VOLUME_PROFILE = {
   wallet: 0.08,
   keys: 0.05,
   pen: 0.03,
+  doc_boarding_pass: 0,
+  doc_insurance_details: 0,
+  doc_digital_copies: 0,
+  backup_payment_method: 0.10,
 
   // Health
   toiletry_kit_minimal: 0.80,
   toiletry_kit_standard: 1.20,
   meds_pouch: 0.20,
   first_aid_kit_small: 0.50,
-  nail_clipper: 0.03,
+  nail_clipper: 0.10,
   toothbrush: 0.05,
   hairbrush_compact: 0.20,
   feminine_hygiene_kit: 0.15,
 
   // Resilience / organization
-  packing_cubes_set_2: 1.00,
+  packing_cubes_set_2: 0.50,
   lock: 0.05,
   ziplocks_set: 0.10,
   daypack_packable: 0.45,
@@ -100,7 +104,7 @@ const VOLUME_PROFILE = {
   // New recommended items
   sleep_kit: 0.10,
   neck_gaiter_buff: 0.05,
-  headlamp_compact: 0.15,
+  headlamp_compact: 0.20,
   sink_stopper_universal: 0.03,
   repair_kit_micro: 0.05,
   travel_pillow_inflatable: 0.40,
@@ -144,25 +148,23 @@ const ITEM_VOLUME_MAP = {
   'clothing-detergent': 'detergent_sheets',
 
   // Tech
-  'tech-phone-charger': 'charger_phone_cable',
+  'tech-phone': 'phone',
   'tech-adapter': 'adapter_universal',
   'tech-earbuds': 'earbuds',
   'tech-laptop': 'laptop_13_14',
-  'tech-phone': 'phone',
-  'tech-travel-adapter': 'adapter_universal',
   'tech-mouse': 'DEFAULT_UNKNOWN_ITEM',
   'tech-hub': 'DEFAULT_UNKNOWN_ITEM',
 
   // Documents
   'docs-passport': 'passport',
-  'docs-boarding': 'DEFAULT_UNKNOWN_ITEM',
-  'docs-insurance': 'DEFAULT_UNKNOWN_ITEM',
-  'docs-copies': 'DEFAULT_UNKNOWN_ITEM',
+  'docs-boarding': 'doc_boarding_pass',
+  'docs-insurance': 'doc_insurance_details',
+  'docs-copies': 'doc_digital_copies',
 
   // Financial
   'fin-cards': 'wallet',
   'fin-cash': 'DEFAULT_UNKNOWN_ITEM',
-  'fin-backup-card': 'DEFAULT_UNKNOWN_ITEM',
+  'fin-backup-card': 'backup_payment_method',
 
   // Health
   'health-toiletries': 'toiletry_kit_standard',
@@ -181,7 +183,6 @@ const ITEM_VOLUME_MAP = {
   // Resilience
   'res-lock': 'lock',
   'res-packbags': 'packing_cubes_set_2',
-  'res-ziplock': 'ziplocks_set',
   'res-pen': 'pen',
   'res-daysack': 'daypack_packable',
   'res-waterbottle': 'water_bottle_collapsible',
@@ -229,6 +230,12 @@ const ITEM_VOLUME_MAP = {
   'opt-rain-shell': 'shell_rain_light',
   'opt-warm-accessories': 'cold_accessories_set',
   'opt-swimwear': 'swim_trunks',
+
+  // New optional add-ons (moved from recommended)
+  'opt-sleep-kit': 'sleep_kit',
+  'opt-electrolytes': 'rehydration_salts',
+  'opt-headlamp': 'headlamp_compact',
+  'opt-laptop': 'laptop_13_14',
 };
 
 /**

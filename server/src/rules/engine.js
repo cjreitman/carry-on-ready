@@ -67,6 +67,10 @@ const OPTIONAL_ADDONS = [
   { id: 'opt-contact-lenses', label: 'Contact lenses', tooltip: '~0.02L. Pack enough pairs for your trip length.' },
   { id: 'opt-contact-case', label: 'Contact lens case', tooltip: '~0.02L. Small but essential if you wear contacts.' },
   { id: 'opt-contact-solution', label: 'Contact lens solution (travel size)', tooltip: '~0.12L. TSA-friendly travel bottle.' },
+  { id: 'opt-sleep-kit', label: 'Sleep kit (eye mask + earplugs)', tooltip: 'Short flights, hostels, and light sleepers.' },
+  { id: 'opt-electrolytes', label: 'Electrolyte packets', tooltip: 'Useful for heat, long travel days, or heavy activity.' },
+  { id: 'rec-clothesline', label: 'Packable clothesline', tooltip: 'Handy for sink washes and drying items overnight.' },
+  { id: 'opt-headlamp', label: 'Compact headlamp (rechargeable)', tooltip: 'Useful for power outages, night arrivals, and hiking.' },
 ];
 
 const CARRYON_PRINCIPLES = [
@@ -197,11 +201,13 @@ function generate(rawInput) {
 
   const volumeDerived = computeVolumeDerived(checklist, parsed.bagLiters);
 
-  // 12. Build optional add-ons (static list, then filter gender-conditional ones)
+  // 12. Build optional add-ons — skip any whose ID is already in the checklist
   const checklistIdSet = new Set(checklist.map((item) => item.id));
   const optionalAddOns = OPTIONAL_ADDONS
     .filter((addon) => {
-      // Hairbrush: only show as add-on when NOT already essential (female/non-binary)
+      // Generic: skip if this exact ID is already recommended
+      if (checklistIdSet.has(addon.id)) return false;
+      // Hairbrush: also skip opt-hairbrush when health-hairbrush is essential
       if (addon.id === 'opt-hairbrush') {
         return !checklistIdSet.has('health-hairbrush');
       }
@@ -210,6 +216,20 @@ function generate(rawInput) {
     .map((addon) =>
       attachVolume({ ...addon, section: 'Optional', count: 1, packed: false })
     );
+
+  // 12b. Laptop: offer as optional when not already recommended
+  if (!checklistIdSet.has('tech-laptop')) {
+    optionalAddOns.push(
+      attachVolume({
+        id: 'opt-laptop',
+        section: 'Optional',
+        label: 'Laptop',
+        tooltip: 'Add if you\'ll be working or need a full keyboard/workflow.',
+        count: 1,
+        packed: false,
+      })
+    );
+  }
 
   // 13. Contextual optional add-ons (suppressed recommendations)
   const optionalIdSet = new Set(optionalAddOns.map((a) => a.id));
