@@ -4,7 +4,7 @@
 module.exports = function documentsRule(ctx, draft) {
   if (ctx.derived.passportRecommended) {
     draft.items.push(
-      { id: 'docs-passport', section: 'Documents', label: 'Passport (likely needed)', count: 1, packed: false }
+      { id: 'docs-passport', section: 'Documents', label: 'Passport', count: 1, packed: false }
     );
   }
 
