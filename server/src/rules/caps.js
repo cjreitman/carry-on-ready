@@ -31,18 +31,14 @@ function applyCaps(counts, bagTier) {
   if (!caps) return { capped: counts, warnings: [] };
 
   const capped = { ...counts };
-  const warnings = [];
 
   for (const [key, max] of Object.entries(caps)) {
     if (capped[key] != null && capped[key] > max) {
-      warnings.push(
-        `${key} reduced from ${capped[key]} to ${max} to fit ${bagTier} bag tier`
-      );
       capped[key] = max;
     }
   }
 
-  return { capped, warnings };
+  return { capped, warnings: [] };
 }
 
 module.exports = { TIER_CAPS, applyCaps };
