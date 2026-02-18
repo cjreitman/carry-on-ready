@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/src/style.css';
+import { format, parse, isValid, isBefore, startOfDay } from 'date-fns';
 import api from '../utils/api';
 import COUNTRIES from '../utils/countries';
 import { inferClimateFromStop } from '../utils/climateHeuristics';
@@ -67,14 +70,6 @@ const Input = styled.input`
   background: ${({ theme }) => theme.colors.inputBg};
   color: ${({ theme }) => theme.colors.text};
   width: 100%;
-`;
-
-const DateInput = styled(Input)`
-  cursor: pointer;
-
-  &::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-  }
 `;
 
 const DropdownChevron = styled.span`
@@ -326,6 +321,256 @@ const CheckboxInput = styled.input`
   height: 14px;
   cursor: pointer;
 `;
+
+// --- Date picker styles ---
+
+const DateFieldWrap = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const DateFieldInput = styled(Input)`
+  padding-right: 32px;
+  cursor: pointer;
+  &::placeholder { color: ${({ theme }) => theme.colors.textLight}; }
+`;
+
+const CalendarPopover = styled.div`
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 20;
+  background: ${({ theme }) => theme.colors.bgLight};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+
+  .rdp-root {
+    --rdp-accent-color: ${({ theme }) => theme.colors.primary};
+    --rdp-accent-background-color: ${({ theme }) => theme.colors.primary}22;
+    --rdp-range_middle-background-color: ${({ theme }) => theme.colors.primary}22;
+    --rdp-range_middle-color: ${({ theme }) => theme.colors.text};
+    --rdp-range_start-color: #fff;
+    --rdp-range_start-date-background-color: ${({ theme }) => theme.colors.primary};
+    --rdp-range_end-color: #fff;
+    --rdp-range_end-date-background-color: ${({ theme }) => theme.colors.primary};
+    --rdp-today-color: ${({ theme }) => theme.colors.primary};
+    --rdp-day-height: 36px;
+    --rdp-day-width: 36px;
+    --rdp-day_button-height: 36px;
+    --rdp-day_button-width: 36px;
+    --rdp-day_button-border-radius: 50%;
+    --rdp-selected-border: 2px solid ${({ theme }) => theme.colors.primary};
+    font-size: 0.85rem;
+    color: ${({ theme }) => theme.colors.text};
+  }
+
+  .rdp-day {
+    padding: 0;
+  }
+  .rdp-day_button {
+    width: 100%;
+    height: 100%;
+    color: ${({ theme }) => theme.colors.text};
+  }
+  .rdp-weekday {
+    color: ${({ theme }) => theme.colors.textLight};
+    font-size: 0.75rem;
+  }
+  .rdp-month_caption {
+    color: ${({ theme }) => theme.colors.text};
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .rdp-button_previous, .rdp-button_next {
+    color: ${({ theme }) => theme.colors.text};
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 4px;
+    &:hover { background: ${({ theme }) => theme.colors.border}; }
+  }
+  .rdp-chevron {
+    fill: ${({ theme }) => theme.colors.text};
+  }
+`;
+
+const DateHint = styled.div`
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.colors.textLight};
+  text-align: center;
+`;
+
+// --- DateRangeFields component ---
+
+function parseISODate(str) {
+  if (!str) return undefined;
+  const d = parse(str, 'yyyy-MM-dd', new Date());
+  return isValid(d) ? d : undefined;
+}
+
+function formatISODate(d) {
+  if (!d || !isValid(d)) return '';
+  return format(d, 'yyyy-MM-dd');
+}
+
+function formatDisplay(d) {
+  if (!d || !isValid(d)) return '';
+  return format(d, 'MMM d, yyyy');
+}
+
+function DateRangeFields({
+  startDate, endDate, onChangeStart, onChangeEnd,
+  startId, endId, startError, endError,
+}) {
+  const [openField, setOpenField] = useState(null); // 'start' | 'end' | null
+  const [hoverDate, setHoverDate] = useState(undefined);
+  const startRef = useRef(null);
+  const endRef = useRef(null);
+
+  const startDateObj = parseISODate(startDate);
+  const endDateObj = parseISODate(endDate);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!openField) return;
+    function handleClick(e) {
+      const startEl = startRef.current;
+      const endEl = endRef.current;
+      if (startEl && startEl.contains(e.target)) return;
+      if (endEl && endEl.contains(e.target)) return;
+      setOpenField(null);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [openField]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!openField) return;
+    function handleKey(e) {
+      if (e.key === 'Escape') setOpenField(null);
+    }
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [openField]);
+
+  // Pointer-based hover tracking (fixes flicker by reading td[data-day])
+  function handleCalendarPointerMove(e) {
+    const cell = e.target.closest('[data-day]');
+    if (!cell) return;
+    const dayStr = cell.getAttribute('data-day');
+    if (!dayStr) return;
+    const date = parse(dayStr, 'yyyy-MM-dd', new Date());
+    if (isValid(date)) {
+      setHoverDate(date);
+    }
+  }
+
+  function handleCalendarPointerLeave() {
+    setHoverDate(undefined);
+  }
+
+  // Start picker: range mode onSelect gives (range, triggerDate)
+  function handleStartSelect(_range, triggerDate) {
+    if (!triggerDate) return;
+    const iso = formatISODate(triggerDate);
+    onChangeStart(iso);
+    // If end date exists and is before new start, clear it
+    if (endDateObj && isBefore(endDateObj, startOfDay(triggerDate))) {
+      onChangeEnd('');
+    }
+    // After picking start, open end picker
+    setOpenField('end');
+  }
+
+  function handleEndSelect(range) {
+    if (!range) return;
+    // In range mode, react-day-picker returns { from, to }
+    if (range.to) {
+      onChangeEnd(formatISODate(range.to));
+      setOpenField(null);
+      setHoverDate(undefined);
+    }
+  }
+
+  // Full range shown in both pickers when both dates exist
+  const selectedRange = startDateObj
+    ? { from: startDateObj, to: endDateObj || undefined }
+    : undefined;
+
+  // End picker: hover preview when endDate not yet set
+  const endPickerSelected = startDateObj
+    ? { from: startDateObj, to: (hoverDate && !endDateObj) ? hoverDate : endDateObj }
+    : undefined;
+
+  return (
+    <Row>
+      <Field>
+        Start Date
+        <DateFieldWrap ref={startRef}>
+          <DateFieldInput
+            id={startId}
+            readOnly
+            value={startDateObj ? formatDisplay(startDateObj) : ''}
+            placeholder="Select date"
+            onClick={() => setOpenField(openField === 'start' ? null : 'start')}
+          />
+          <DropdownChevron>&#x25BE;</DropdownChevron>
+          {openField === 'start' && (
+            <CalendarPopover>
+              <DayPicker
+                mode="range"
+                selected={selectedRange}
+                onSelect={handleStartSelect}
+                defaultMonth={startDateObj || new Date()}
+              />
+            </CalendarPopover>
+          )}
+        </DateFieldWrap>
+        {startError && <InlineError>{startError}</InlineError>}
+      </Field>
+      <Field>
+        End Date
+        <DateFieldWrap ref={endRef}>
+          <DateFieldInput
+            id={endId}
+            readOnly
+            value={endDateObj ? formatDisplay(endDateObj) : ''}
+            placeholder={startDateObj ? 'Select date' : 'Pick start first'}
+            onClick={() => {
+              if (!startDateObj) return;
+              setOpenField(openField === 'end' ? null : 'end');
+            }}
+            style={{ opacity: startDateObj ? 1 : 0.6 }}
+          />
+          <DropdownChevron>&#x25BE;</DropdownChevron>
+          {openField === 'end' && (
+            <CalendarPopover
+              onPointerMove={handleCalendarPointerMove}
+              onPointerLeave={handleCalendarPointerLeave}
+            >
+              {!startDateObj ? (
+                <DateHint>Pick a start date first</DateHint>
+              ) : (
+                <DayPicker
+                  mode="range"
+                  selected={endPickerSelected}
+                  onSelect={handleEndSelect}
+                  disabled={{ before: startDateObj }}
+                  defaultMonth={endDateObj || startDateObj || new Date()}
+                />
+              )}
+            </CalendarPopover>
+          )}
+        </DateFieldWrap>
+        {endError && <InlineError>{endError}</InlineError>}
+      </Field>
+    </Row>
+  );
+}
 
 // --- Country set for fast lookup ---
 
@@ -843,47 +1088,24 @@ export default function Build() {
             </Row>
             )}
             {!isIndefiniteTravel && (
-            <Row>
-              <Field>
-                Start Date
-                <DateInput
-                  id={`field-stop-${i}-startDate`}
-                  type="date"
-                  value={s.startDate}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    updateStop(i, 'startDate', val);
-                    clearFieldError(`stop-${i}-startDate`);
-                    clearFieldError(`stop-${i}-endDate`);
-                    if (val && s.endDate && s.endDate < val) {
-                      updateStop(i, 'endDate', val);
-                    }
-                  }}
-                  onClick={(e) => e.target.showPicker?.()}
-                />
-                {fieldErrors[`stop-${i}-startDate`] && <InlineError>{fieldErrors[`stop-${i}-startDate`]}</InlineError>}
-              </Field>
-              <Field>
-                End Date
-                <DateInput
-                  id={`field-stop-${i}-endDate`}
-                  type="date"
-                  min={s.startDate || undefined}
-                  value={s.endDate}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    updateStop(i, 'endDate', val);
-                    clearFieldError(`stop-${i}-startDate`);
-                    clearFieldError(`stop-${i}-endDate`);
-                    if (s.startDate && val && val < s.startDate) {
-                      setFieldErrors((prev) => ({ ...prev, [`stop-${i}-endDate`]: 'End date must be on or after start date.' }));
-                    }
-                  }}
-                  onClick={(e) => e.target.showPicker?.()}
-                />
-                {fieldErrors[`stop-${i}-endDate`] && <InlineError>{fieldErrors[`stop-${i}-endDate`]}</InlineError>}
-              </Field>
-            </Row>
+              <DateRangeFields
+                startDate={s.startDate}
+                endDate={s.endDate}
+                onChangeStart={(val) => {
+                  updateStop(i, 'startDate', val);
+                  clearFieldError(`stop-${i}-startDate`);
+                  clearFieldError(`stop-${i}-endDate`);
+                }}
+                onChangeEnd={(val) => {
+                  updateStop(i, 'endDate', val);
+                  clearFieldError(`stop-${i}-startDate`);
+                  clearFieldError(`stop-${i}-endDate`);
+                }}
+                startId={`field-stop-${i}-startDate`}
+                endId={`field-stop-${i}-endDate`}
+                startError={fieldErrors[`stop-${i}-startDate`]}
+                endError={fieldErrors[`stop-${i}-endDate`]}
+              />
             )}
             <Row>
               <Field>
