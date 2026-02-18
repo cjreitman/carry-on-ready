@@ -1026,7 +1026,9 @@ export default function Results() {
             <CapacityLabel $state={capacityState}>
               <span>Pack volume</span>
               <strong>
-                {totalVolume}L / {usableCapacity}L ({percentUsed}%)
+                {totalVolume}L / {usableCapacity}L usable
+                <InfoTooltip text="We calculate usable capacity at 85% of your pack's listed volume to reflect real-world packing inefficiencies. Fabric structure, curved seams, and dead space mean you can't fully use every liter." />
+                {' '}({percentUsed}%)
               </strong>
             </CapacityLabel>
             <CapacityTrack>
