@@ -44,7 +44,7 @@ export default function About() {
       <Paragraph>
         If Carry-On Ready has helped you travel lighter or think more clearly about
         your setup, you can support the project{' '}
-        <a href="https://buymeacoffee.com/colin" target="_blank" rel="noopener noreferrer">here</a>.
+        <a href="https://buymeacoffee.com/cjreitman" target="_blank" rel="noopener noreferrer">here</a>.
       </Paragraph>
       <Signature>
         <div>Colin</div>
