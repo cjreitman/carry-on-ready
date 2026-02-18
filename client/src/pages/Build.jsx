@@ -296,10 +296,14 @@ const CheckboxInput = styled.input`
 
 // --- Country set for fast lookup ---
 
-const COUNTRY_SET = new Set(COUNTRIES.map((c) => c.toLowerCase()));
+const COUNTRY_LOWER_MAP = new Map(COUNTRIES.map((c) => [c.toLowerCase(), c]));
 
 function isValidCountry(val) {
-  return COUNTRY_SET.has(val.trim().toLowerCase());
+  return COUNTRY_LOWER_MAP.has(val.trim().toLowerCase());
+}
+
+function resolveCanonical(val) {
+  return COUNTRY_LOWER_MAP.get(val.trim().toLowerCase()) || null;
 }
 
 // --- Autocomplete component ---
@@ -356,7 +360,12 @@ function CountryAutocomplete({ value, onCommit, placeholder }) {
   function handleBlur() {
     // Delay to allow mousedown on dropdown items to fire first
     setTimeout(() => {
-      if (!isValidCountry(inputText)) {
+      const canonical = resolveCanonical(inputText);
+      if (canonical) {
+        setInputText(canonical);
+        onCommit(canonical);
+        prevValue.current = canonical;
+      } else {
         setInputText('');
         onCommit('');
         prevValue.current = '';

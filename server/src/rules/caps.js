@@ -1,6 +1,6 @@
 const TIER_CAPS = {
   ULTRA: {
-    shoes: 1, pants: 1, shirts: 3,
+    shoes: 2, pants: 1, shirts: 3,
     underwear: 4, socks: 4,
     midlayers: 1, outerwear: 1,
   },

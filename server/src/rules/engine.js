@@ -4,6 +4,7 @@ const { applyCaps } = require('./caps');
 const { attachVolume, computeVolumeDerived } = require('./volume');
 
 const { BASELINE_ITEMS } = require('./baselineItems');
+const { CONTEXTUAL_ADDONS } = require('./contextualAddOns');
 const clothingRule = require('./rules/clothing');
 const techRule = require('./rules/tech');
 const documentsRule = require('./rules/documents');
@@ -190,7 +191,7 @@ function generate(rawInput) {
 
   const volumeDerived = computeVolumeDerived(checklist, parsed.bagLiters);
 
-  // 12. Build optional add-ons (full list, then filter gender-conditional ones)
+  // 12. Build optional add-ons (static list, then filter gender-conditional ones)
   const checklistIdSet = new Set(checklist.map((item) => item.id));
   const optionalAddOns = OPTIONAL_ADDONS
     .filter((addon) => {
@@ -203,6 +204,24 @@ function generate(rawInput) {
     .map((addon) =>
       attachVolume({ ...addon, section: 'Optional', count: 1, packed: false })
     );
+
+  // 13. Contextual optional add-ons (suppressed recommendations)
+  const optionalIdSet = new Set(optionalAddOns.map((a) => a.id));
+  for (const entry of CONTEXTUAL_ADDONS) {
+    if (checklistIdSet.has(entry.id) || optionalIdSet.has(entry.id)) continue;
+    if (entry.includeWhen(derived, parsed)) continue; // already recommended
+    if (!entry.showWhenSuppressed(derived, parsed)) continue; // not relevant
+    optionalAddOns.push(
+      attachVolume({
+        id: entry.id,
+        section: 'Optional',
+        label: entry.label,
+        tooltip: entry.tooltip,
+        count: 1,
+        packed: false,
+      })
+    );
+  }
 
   return {
     checklist,

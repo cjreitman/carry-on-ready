@@ -13,9 +13,8 @@ module.exports = function clothingRule(ctx, draft) {
   let shirts = 4;
   let underwear, socks;
 
-  // Hot-only: reduce shoes and pants
+  // Hot-only: reduce pants (shoes stay at 2 so wearOne math works)
   if (climate === 'hot') {
-    shoes = 1;
     pants = 1;
   }
 

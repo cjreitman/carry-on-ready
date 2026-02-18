@@ -187,6 +187,13 @@ const ITEM_VOLUME_MAP = {
   'opt-detergent': 'detergent_sheets',
   'opt-mouse': 'DEFAULT_UNKNOWN_ITEM',
   'opt-hairbrush': 'hairbrush_compact',
+
+  // Contextual optional add-ons
+  'opt-puffy-jacket': 'jacket_down_packable',
+  'opt-midlayer': 'sweater_merino_midweight',
+  'opt-rain-shell': 'shell_rain_light',
+  'opt-warm-accessories': 'cold_accessories_set',
+  'opt-swimwear': 'swim_trunks',
 };
 
 /**
