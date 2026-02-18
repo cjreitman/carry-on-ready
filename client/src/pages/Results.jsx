@@ -13,15 +13,19 @@ const ITEM_TOOLTIPS = {
   'clothing-shoes':
     'If packing a second pair for running, choose minimalist or collapsible shoes to reduce bulk.',
   'clothing-shirts':
-    'Merino wool resists odor, allowing fewer shirts for longer trips.',
+    'Odor-resistant fabrics (like merino wool) can reduce how many you need.',
   'clothing-underwear':
-    'Quick-dry fabrics allow sink washing and overnight drying.',
+    'Odor-resistant fabrics (like merino wool) can reduce how many you need.',
   'clothing-socks':
-    'Merino socks dry fast and reduce odor over multi-day wear.',
+    'Odor-resistant fabrics (like merino wool) can reduce how many you need.',
   'health-toiletries':
     'Use 100ml TSA-compliant containers to stay carry-on legal.',
+  'health-meds':
+    'Verify prescriptions are legal in your destination countries.',
   'res-packbags':
     'Compression packing cubes can reduce volume by 20–30%.',
+  'res-waterbottle':
+    'A collapsible bottle saves space when empty.',
 };
 
 // --- Styled pieces ---

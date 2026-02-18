@@ -57,7 +57,7 @@ const BASELINE_ITEMS = [
   {
     id: 'res-waterbottle',
     section: 'Resilience',
-    label: 'Collapsible water bottle',
+    label: 'Water bottle',
     tier: 'essential',
     genders: ['all'],
     climates: ['all'],

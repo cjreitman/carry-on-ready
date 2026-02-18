@@ -86,7 +86,9 @@ const VOLUME_PROFILE = {
   daypack_packable: 0.45,
   sling_small: 0.35,
   clothesline_packable: 0.10,
-  water_bottle_collapsible: 0.20,
+  // Key name retained for backward compatibility.
+  // Volume estimate assumes ~0.75L bottle. A collapsible model saves space when empty.
+  water_bottle_collapsible: 0.75,
   sunglasses_case: 0.15,
 
   // Misc

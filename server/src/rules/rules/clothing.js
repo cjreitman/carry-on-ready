@@ -68,11 +68,11 @@ module.exports = function clothingRule(ctx, draft) {
 
   // --- Explicit layer items (midlayers/outerwear stay at 0 in clothingCounts) ---
 
-  // Always recommend a merino midlayer
+  // Always recommend a midlayer
   draft.items.push({
     id: 'clothing-midlayer',
     section: 'Clothing',
-    label: 'Merino sweater / midlayer',
+    label: 'Midlayer (sweater or fleece)',
     count: 1,
     packed: false,
   });

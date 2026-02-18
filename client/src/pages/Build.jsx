@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { DayPicker } from 'react-day-picker';
@@ -320,6 +320,39 @@ const CheckboxInput = styled.input`
   width: 14px;
   height: 14px;
   cursor: pointer;
+`;
+
+// --- Bag size mode toggle ---
+
+const ModeToggle = styled.div`
+  display: flex;
+  gap: 0;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+`;
+
+const ModeBtn = styled.button`
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  border: none;
+  background: ${({ $active, theme }) => $active ? theme.colors.primary : theme.colors.inputBg};
+  color: ${({ $active, theme }) => $active ? '#fff' : theme.colors.text};
+  font-weight: ${({ $active }) => $active ? 600 : 400};
+  transition: background 0.15s, color 0.15s;
+
+  &:not(:last-child) {
+    border-right: 1px solid ${({ theme }) => theme.colors.border};
+  }
+`;
+
+const DimHint = styled.div`
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.colors.textLight};
+  margin-top: 4px;
 `;
 
 // --- Date picker styles ---
@@ -855,8 +888,21 @@ export default function Build() {
 
   // Step 2 state
   const [bagLiters, setBagLiters] = useState(35);
+  const [bagSizeMode, setBagSizeMode] = useState('liters');
+  const [bagDimL, setBagDimL] = useState('');
+  const [bagDimW, setBagDimW] = useState('');
+  const [bagDimH, setBagDimH] = useState('');
   const [laundry, setLaundry] = useState('none');
   const [workSetup, setWorkSetup] = useState('none');
+
+  const computedLiters = useMemo(() => {
+    if (bagSizeMode !== 'dimensions') return null;
+    const l = parseFloat(bagDimL);
+    const w = parseFloat(bagDimW);
+    const h = parseFloat(bagDimH);
+    if (!l || !w || !h || l <= 0 || w <= 0 || h <= 0) return null;
+    return +((l * w * h) / 1000).toFixed(1);
+  }, [bagSizeMode, bagDimL, bagDimW, bagDimH]);
 
   // --- Stop helpers ---
 
@@ -932,8 +978,14 @@ export default function Build() {
   }
 
   function validateStep2() {
-    if (!bagLiters || bagLiters <= 0) {
-      return 'Bag size must be greater than 0.';
+    if (bagSizeMode === 'liters') {
+      if (!bagLiters || Number(bagLiters) <= 0) {
+        return 'Bag size must be greater than 0.';
+      }
+    } else {
+      if (computedLiters == null || computedLiters <= 0) {
+        return 'Enter valid dimensions (all must be > 0).';
+      }
     }
     return '';
   }
@@ -983,7 +1035,7 @@ export default function Build() {
         climateOverride: s.climateOverride || null,
         rainExpected: s.rainExpected,
       })),
-      bagLiters: Number(bagLiters),
+      bagLiters: bagSizeMode === 'liters' ? Number(bagLiters) : computedLiters,
       laundry,
       workSetup,
       gender,
@@ -1241,13 +1293,35 @@ export default function Build() {
       <Card>
         <Row>
           <Field>
-            Bag Size (liters)
-            <Input
-              type="number"
-              min={1}
-              value={bagLiters}
-              onChange={(e) => setBagLiters(e.target.value)}
-            />
+            Bag Size
+            <ModeToggle>
+              <ModeBtn $active={bagSizeMode === 'liters'} onClick={() => setBagSizeMode('liters')}>Liters</ModeBtn>
+              <ModeBtn $active={bagSizeMode === 'dimensions'} onClick={() => setBagSizeMode('dimensions')}>Dimensions (cm)</ModeBtn>
+            </ModeToggle>
+            {bagSizeMode === 'liters' ? (
+              <Input
+                type="number"
+                min={1}
+                value={bagLiters}
+                onChange={(e) => setBagLiters(e.target.value)}
+              />
+            ) : (
+              <>
+                <Row style={{ marginBottom: 0 }}>
+                  <Field>
+                    <Input type="number" min={1} placeholder="Depth" value={bagDimL} onChange={(e) => setBagDimL(e.target.value)} />
+                  </Field>
+                  <Field>
+                    <Input type="number" min={1} placeholder="Width" value={bagDimW} onChange={(e) => setBagDimW(e.target.value)} />
+                  </Field>
+                  <Field>
+                    <Input type="number" min={1} placeholder="Height" value={bagDimH} onChange={(e) => setBagDimH(e.target.value)} />
+                  </Field>
+                </Row>
+                <DimHint>Estimated volume: {computedLiters != null ? `${computedLiters} L` : '\u2014'}</DimHint>
+                <DimHint style={{ fontSize: '0.7rem' }}>Based on external dimensions \u2014 usable packing space may be slightly less.</DimHint>
+              </>
+            )}
           </Field>
         </Row>
         <Row>

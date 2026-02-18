@@ -18,10 +18,10 @@ function getClothingLabels(gender) {
   if (gender === 'male') return {
     shoes: 'Shoes (wear bulkiest, pack the other)',
     pants: 'Pants / shorts',
-    shirts: 'Merino T-shirts / tops',
-    underwear: 'Merino boxers',
-    socks: 'Merino socks',
-    midlayers: 'Merino sweater / midlayer',
+    shirts: 'T-shirts / tops',
+    underwear: 'Underwear',
+    socks: 'Socks',
+    midlayers: 'Midlayer (sweater or fleece)',
     outerwear: 'Outerwear',
   };
   if (gender === 'female') return {
@@ -29,8 +29,8 @@ function getClothingLabels(gender) {
     pants: 'Bottoms (pants, skirt, or leggings)',
     shirts: 'Tops (quick-dry preferred)',
     underwear: 'Underwear',
-    socks: 'Socks (merino recommended)',
-    midlayers: 'Merino sweater / midlayer',
+    socks: 'Socks',
+    midlayers: 'Midlayer (sweater or fleece)',
     outerwear: 'Outerwear',
   };
   // non-binary / prefer-not-to-say
@@ -38,9 +38,9 @@ function getClothingLabels(gender) {
     shoes: 'Shoes (wear bulkiest, pack the other)',
     pants: 'Bottoms',
     shirts: 'Tops (quick-dry preferred)',
-    underwear: 'Underwear (merino recommended)',
-    socks: 'Socks (merino recommended)',
-    midlayers: 'Sweater / midlayer',
+    underwear: 'Underwear',
+    socks: 'Socks',
+    midlayers: 'Midlayer (sweater or fleece)',
     outerwear: 'Outerwear',
   };
 }
