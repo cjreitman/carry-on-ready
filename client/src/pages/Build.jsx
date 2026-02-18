@@ -77,14 +77,20 @@ const DateInput = styled(Input)`
   }
 `;
 
-const Select = styled.select`
-  padding: 8px 36px 8px 10px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 4px;
-  font-size: 0.95rem;
-  background: ${({ theme }) => theme.colors.inputBg};
-  color: ${({ theme }) => theme.colors.text};
-  width: 100%;
+const DropdownChevron = styled.span`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: ${({ theme }) => theme.colors.textLight};
+  font-size: 0.65rem;
+  z-index: 1;
+`;
+
+const DropdownInputStyled = styled(Input)`
+  padding-right: 32px;
+  cursor: pointer;
 `;
 
 const FieldHint = styled.span`
@@ -430,7 +436,7 @@ function CountryAutocomplete({ value, onCommit, placeholder, inputId }) {
 
   return (
     <AutocompleteWrap ref={wrapRef}>
-      <Input
+      <DropdownInputStyled
         id={inputId}
         value={inputText}
         onChange={(e) => {
@@ -449,6 +455,7 @@ function CountryAutocomplete({ value, onCommit, placeholder, inputId }) {
         placeholder={placeholder}
         autoComplete="off"
       />
+      <DropdownChevron>&#x25BE;</DropdownChevron>
       {open && filtered.length > 0 && (
         <DropdownList ref={listRef}>
           {filtered.map((c, i) => (
@@ -458,6 +465,104 @@ function CountryAutocomplete({ value, onCommit, placeholder, inputId }) {
               onMouseDown={() => selectCountry(c)}
             >
               {c}
+            </DropdownItem>
+          ))}
+        </DropdownList>
+      )}
+    </AutocompleteWrap>
+  );
+}
+
+// --- DropdownSelect component (for fixed option lists) ---
+
+function DropdownSelect({ value, onCommit, options, placeholder, inputId }) {
+  const [open, setOpen] = useState(false);
+  const [highlightIdx, setHighlightIdx] = useState(-1);
+  const wrapRef = useRef(null);
+  const listRef = useRef(null);
+
+  const selectedOption = options.find((o) => o.value === value);
+  const displayText = selectedOption ? selectedOption.label : (placeholder || '');
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClick(e) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightIdx >= 0 && listRef.current) {
+      const item = listRef.current.children[highlightIdx];
+      if (item) item.scrollIntoView({ block: 'nearest' });
+    }
+  }, [highlightIdx]);
+
+  function selectOption(opt) {
+    onCommit(opt.value);
+    setOpen(false);
+    setHighlightIdx(-1);
+  }
+
+  function handleKeyDown(e) {
+    if (!open) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setOpen(true);
+        const currentIdx = options.findIndex((o) => o.value === value);
+        setHighlightIdx(currentIdx >= 0 ? currentIdx : 0);
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightIdx((prev) => Math.min(prev + 1, options.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightIdx((prev) => Math.max(prev - 1, 0));
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (highlightIdx >= 0 && highlightIdx < options.length) {
+        selectOption(options[highlightIdx]);
+      }
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+      setHighlightIdx(-1);
+    }
+  }
+
+  return (
+    <AutocompleteWrap ref={wrapRef}>
+      <DropdownInputStyled
+        id={inputId}
+        value={displayText}
+        readOnly
+        onClick={() => {
+          setOpen((prev) => !prev);
+          if (!open) {
+            const currentIdx = options.findIndex((o) => o.value === value);
+            setHighlightIdx(currentIdx >= 0 ? currentIdx : 0);
+          }
+        }}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+      />
+      <DropdownChevron>&#x25BE;</DropdownChevron>
+      {open && options.length > 0 && (
+        <DropdownList ref={listRef}>
+          {options.map((opt, i) => (
+            <DropdownItem
+              key={opt.value === '' ? '__empty__' : opt.value}
+              $active={i === highlightIdx}
+              onMouseDown={() => selectOption(opt)}
+            >
+              {opt.label}
             </DropdownItem>
           ))}
         </DropdownList>
@@ -736,24 +841,15 @@ export default function Build() {
             <Row>
               <Field>
                 Climate override
-                <Select
+                <DropdownSelect
                   value={s.climateOverride}
-                  onChange={(e) =>
-                    updateStop(i, 'climateOverride', e.target.value)
-                  }
-                >
-                  <option value="">
-                    {(() => {
-                      const inf = inferClimateFromStop(s);
-                      return inf ? `Auto (${inf.climate})` : 'Auto (based on destination + dates)';
-                    })()}
-                  </option>
-                  {CLIMATE_OPTIONS.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </Select>
+                  onCommit={(val) => updateStop(i, 'climateOverride', val)}
+                  options={[
+                    { value: '', label: (() => { const inf = inferClimateFromStop(s); return inf ? `Auto (${inf.climate})` : 'Auto (based on destination + dates)'; })() },
+                    ...CLIMATE_OPTIONS.map((c) => ({ value: c, label: c })),
+                  ]}
+                  placeholder="Select climate"
+                />
                 {(() => {
                   const inf = inferClimateFromStop(s);
                   const inferredRain = inf ? inf.rainExpected : false;
@@ -847,6 +943,13 @@ export default function Build() {
                   setMustBringItems((prev) => prev.slice(0, -1));
                 }
               }}
+              onBlur={(e) => {
+                const val = e.target.value.replace(/,/g, '').trim();
+                if (val && !mustBringItems.some((t) => t.toLowerCase() === val.toLowerCase())) {
+                  setMustBringItems((prev) => [...prev, val]);
+                }
+                e.target.value = '';
+              }}
             />
           </TagWrap>
         </Card>
@@ -881,29 +984,21 @@ export default function Build() {
         <Row>
           <Field>
             Laundry Access
-            <Select
+            <DropdownSelect
               value={laundry}
-              onChange={(e) => setLaundry(e.target.value)}
-            >
-              {LAUNDRY_OPTIONS.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
-              ))}
-            </Select>
+              onCommit={(val) => setLaundry(val)}
+              options={LAUNDRY_OPTIONS.map((l) => ({ value: l, label: l.charAt(0).toUpperCase() + l.slice(1) }))}
+              placeholder="Select laundry access"
+            />
           </Field>
           <Field>
             Work Setup
-            <Select
+            <DropdownSelect
               value={workSetup}
-              onChange={(e) => setWorkSetup(e.target.value)}
-            >
-              {WORK_OPTIONS.map((w) => (
-                <option key={w} value={w}>
-                  {w}
-                </option>
-              ))}
-            </Select>
+              onCommit={(val) => setWorkSetup(val)}
+              options={WORK_OPTIONS.map((w) => ({ value: w, label: w.charAt(0).toUpperCase() + w.slice(1) }))}
+              placeholder="Select work setup"
+            />
           </Field>
         </Row>
       </Card>

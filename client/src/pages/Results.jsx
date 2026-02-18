@@ -776,6 +776,23 @@ export default function Results() {
     result ? getSectionOrder(result.checklist) : []
   );
 
+  // Include any extra sections that appear in items (e.g. "Optional Add-ons")
+  const allSections = useMemo(() => {
+    const known = new Set(sectionOrder);
+    const extra = [];
+    for (const item of items) {
+      if (item.section && !known.has(item.section)) {
+        known.add(item.section);
+        extra.push(item.section);
+      }
+    }
+    // Ensure "Optional Add-ons" sorts last among extras
+    extra.sort((a, b) =>
+      a === 'Optional Add-ons' ? 1 : b === 'Optional Add-ons' ? -1 : 0
+    );
+    return [...sectionOrder, ...extra];
+  }, [sectionOrder, items]);
+
   // Volume / capacity derived values
   const usableCapacity = +(localBagLiters * 0.85).toFixed(1);
   const percentUsed = usableCapacity > 0 ? Math.round((totalVolume / usableCapacity) * 100) : 0;
@@ -842,7 +859,14 @@ export default function Results() {
 
   function handleAddOn(addon) {
     if (checklistIds.has(addon.id)) return;
-    addFullItem({ ...addon, isAddOn: true });
+    addFullItem({
+      ...addon,
+      section: 'Optional Add-ons',
+      isAddOn: true,
+      isUserAdded: true,
+      count: addon.count ?? 1,
+      packed: addon.packed ?? false,
+    });
   }
 
   async function handleSave() {
@@ -893,7 +917,7 @@ export default function Results() {
           ))}
 
           {/* Checklist sections */}
-          {sectionOrder.map((sectionName) => {
+          {allSections.map((sectionName) => {
             const sectionItems = sections[sectionName] || [];
             return (
               <Section key={sectionName} data-print-section>
