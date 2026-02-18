@@ -59,6 +59,7 @@ const OPTIONAL_ADDONS = [
   { id: 'opt-lock', label: 'TSA-approved luggage lock', tooltip: '~0.05L. Secures your bag at hostels and airports.' },
   { id: 'opt-detergent', label: 'Detergent sheets / travel soap', tooltip: '~0.1L. Enables sink washes on long trips.' },
   { id: 'opt-mouse', label: 'Travel mouse', tooltip: '~0.2L. Helpful for heavy laptop work sessions.' },
+  { id: 'opt-hairbrush', label: 'Hairbrush', tooltip: '~0.2L. Compact travel brush saves space.' },
 ];
 
 const CARRYON_PRINCIPLES = [
@@ -189,10 +190,19 @@ function generate(rawInput) {
 
   const volumeDerived = computeVolumeDerived(checklist, parsed.bagLiters);
 
-  // 12. Build optional add-ons (always return full list, client manages state)
-  const optionalAddOns = OPTIONAL_ADDONS.map((addon) =>
-    attachVolume({ ...addon, section: 'Optional', count: 1, packed: false })
-  );
+  // 12. Build optional add-ons (full list, then filter gender-conditional ones)
+  const checklistIdSet = new Set(checklist.map((item) => item.id));
+  const optionalAddOns = OPTIONAL_ADDONS
+    .filter((addon) => {
+      // Hairbrush: only show as add-on when NOT already essential (female/non-binary)
+      if (addon.id === 'opt-hairbrush') {
+        return !checklistIdSet.has('health-hairbrush');
+      }
+      return true;
+    })
+    .map((addon) =>
+      attachVolume({ ...addon, section: 'Optional', count: 1, packed: false })
+    );
 
   return {
     checklist,

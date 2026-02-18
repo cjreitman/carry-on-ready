@@ -76,6 +76,8 @@ const VOLUME_PROFILE = {
   meds_pouch: 0.20,
   first_aid_kit_small: 0.50,
   nail_clipper: 0.03,
+  toothbrush: 0.05,
+  hairbrush_compact: 0.20,
 
   // Resilience / organization
   packing_cubes_set_2: 1.00,
@@ -154,6 +156,8 @@ const ITEM_VOLUME_MAP = {
   // Health (new)
   'health-nailclipper': 'nail_clipper',
   'health-ziploc': 'ziplocks_set',
+  'health-toothbrush': 'toothbrush',
+  'health-hairbrush': 'hairbrush_compact',
 
   // Resilience
   'res-lock': 'lock',
@@ -182,6 +186,7 @@ const ITEM_VOLUME_MAP = {
   'opt-lock': 'lock',
   'opt-detergent': 'detergent_sheets',
   'opt-mouse': 'DEFAULT_UNKNOWN_ITEM',
+  'opt-hairbrush': 'hairbrush_compact',
 };
 
 /**
