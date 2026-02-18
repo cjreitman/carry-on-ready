@@ -9,6 +9,18 @@ module.exports = function resilienceRule(ctx, draft) {
     { id: 'res-waterbottle', section: 'Resilience', label: 'Collapsible water bottle', count: 1, packed: false }
   );
 
+  if (ctx.derived.laundry !== 'frequent' || ctx.derived.totalDays > 5) {
+    draft.items.push(
+      { id: 'rec-clothesline', section: 'Resilience', label: 'Packable clothesline', count: 1, packed: false }
+    );
+  }
+
+  if (ctx.derived.totalDays > 3 || ctx.derived.climate !== 'hot') {
+    draft.items.push(
+      { id: 'rec-headlamp', section: 'Resilience', label: 'Compact headlamp (rechargeable)', count: 1, packed: false }
+    );
+  }
+
   if (ctx.derived.totalDays > 10) {
     draft.items.push(
       { id: 'res-daysack', section: 'Resilience', label: 'Packable daypack', count: 1, packed: false }

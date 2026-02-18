@@ -94,6 +94,14 @@ const VOLUME_PROFILE = {
   sunscreen: 0.15,
   rehydration_salts: 0.10,
 
+  // New recommended items
+  sleep_kit: 0.10,
+  neck_gaiter_buff: 0.05,
+  headlamp_compact: 0.15,
+  sink_stopper_universal: 0.03,
+  repair_kit_micro: 0.05,
+  travel_pillow_inflatable: 0.40,
+
   // Optional add-on items
   speaker_bluetooth_mini: 0.30,
   packing_cubes_extra: 0.50,
@@ -103,6 +111,10 @@ const VOLUME_PROFILE = {
   airtag: 0.02,
   shaver_electric_mini: 0.25,
   makeup_kit_travel: 0.50,
+  glasses_pair: 0.10,
+  contact_lenses_set: 0.02,
+  contact_lens_case: 0.02,
+  contact_lens_solution_small: 0.12,
 
   DEFAULT_UNKNOWN_ITEM: 0.20,
 };
@@ -117,13 +129,16 @@ const ITEM_VOLUME_MAP = {
   'clothing-shirts': 'shirt_merino_tshirt',
   'clothing-underwear': 'underwear_merino',
   'clothing-socks': 'socks_merino',
-  'clothing-midlayers': 'fleece_light',
+  'clothing-midlayers': 'sweater_merino_midweight',
   'clothing-outerwear': 'shell_rain_light',
+
+  // Explicit layer items
+  'clothing-midlayer': 'sweater_merino_midweight',
+  'clothing-packable-down': 'jacket_down_packable',
+  'clothing-rain-shell': 'shell_rain_light',
 
   // Clothing extras
   'clothing-detergent': 'detergent_sheets',
-  'clothing-packable-down': 'jacket_down_packable',
-  'clothing-rain-shell': 'shell_rain_light',
 
   // Tech
   'tech-phone-charger': 'charger_phone_cable',
@@ -187,6 +202,22 @@ const ITEM_VOLUME_MAP = {
   'opt-detergent': 'detergent_sheets',
   'opt-mouse': 'DEFAULT_UNKNOWN_ITEM',
   'opt-hairbrush': 'hairbrush_compact',
+
+  // Recommended items
+  'rec-sleep-kit': 'sleep_kit',
+  'rec-clothesline': 'clothesline_packable',
+  'rec-buff': 'neck_gaiter_buff',
+  'rec-headlamp': 'headlamp_compact',
+  'rec-powerbank': 'powerbank_small',
+
+  // New optional add-ons
+  'opt-sink-stopper': 'sink_stopper_universal',
+  'opt-repair-kit': 'repair_kit_micro',
+  'opt-travel-pillow': 'travel_pillow_inflatable',
+  'opt-glasses': 'glasses_pair',
+  'opt-contact-lenses': 'contact_lenses_set',
+  'opt-contact-case': 'contact_lens_case',
+  'opt-contact-solution': 'contact_lens_solution_small',
 
   // Contextual optional add-ons
   'opt-puffy-jacket': 'jacket_down_packable',

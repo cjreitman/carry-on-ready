@@ -47,7 +47,6 @@ function getClothingLabels(gender) {
 
 const OPTIONAL_ADDONS = [
   { id: 'opt-sandals', label: 'Minimalist sandals', tooltip: '~1.2L per pair. Useful for hostels, beaches, or resting primary shoes.' },
-  { id: 'opt-powerbank', label: 'Power bank', tooltip: '~0.25L. Useful for long travel days without outlets.' },
   { id: 'opt-speaker', label: 'Bluetooth speaker', tooltip: '~0.3L. Compact option for downtime.' },
   { id: 'opt-extra-cubes', label: 'Extra packing cubes', tooltip: '~0.5L. Helps separate clean and dirty clothes.' },
   { id: 'opt-towel', label: 'Travel towel (microfiber)', tooltip: '~0.4L. Dries 3x faster than cotton.' },
@@ -61,6 +60,13 @@ const OPTIONAL_ADDONS = [
   { id: 'opt-detergent', label: 'Detergent sheets / travel soap', tooltip: '~0.1L. Enables sink washes on long trips.' },
   { id: 'opt-mouse', label: 'Travel mouse', tooltip: '~0.2L. Helpful for heavy laptop work sessions.' },
   { id: 'opt-hairbrush', label: 'Hairbrush', tooltip: '~0.2L. Compact travel brush saves space.' },
+  { id: 'opt-sink-stopper', label: 'Universal sink stopper', tooltip: '~0.03L. Enables sink washing when drains do not plug.' },
+  { id: 'opt-repair-kit', label: 'Micro repair kit (needle + thread + tape)', tooltip: '~0.05L. Small fixes prevent big failures.' },
+  { id: 'opt-travel-pillow', label: 'Inflatable travel pillow', tooltip: '~0.40L. Improves sleep on flights and long transit days.' },
+  { id: 'opt-glasses', label: 'Glasses (spare or primary)', tooltip: '~0.10L. Recommended if you rely on corrective lenses.' },
+  { id: 'opt-contact-lenses', label: 'Contact lenses', tooltip: '~0.02L. Pack enough pairs for your trip length.' },
+  { id: 'opt-contact-case', label: 'Contact lens case', tooltip: '~0.02L. Small but essential if you wear contacts.' },
+  { id: 'opt-contact-solution', label: 'Contact lens solution (travel size)', tooltip: '~0.12L. TSA-friendly travel bottle.' },
 ];
 
 const CARRYON_PRINCIPLES = [

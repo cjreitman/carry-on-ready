@@ -1041,7 +1041,7 @@ export default function Results() {
             )}
             {capacityState === 'warning' && (
               <CapacityHint $state="warning">
-                Getting tight — consider slimming down.
+                Getting tight — consider trimming down.
               </CapacityHint>
             )}
           </CapacityWrap>

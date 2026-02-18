@@ -66,9 +66,18 @@ module.exports = function clothingRule(ctx, draft) {
   // Store raw counts on draft for capping
   draft.clothingCounts = { shoes, pants, shirts, underwear, socks, midlayers: 0, outerwear: 0 };
 
-  // --- Climate modifiers ---
+  // --- Explicit layer items (midlayers/outerwear stay at 0 in clothingCounts) ---
+
+  // Always recommend a merino midlayer
+  draft.items.push({
+    id: 'clothing-midlayer',
+    section: 'Clothing',
+    label: 'Merino sweater / midlayer',
+    count: 1,
+    packed: false,
+  });
+
   if (climate === 'cold' || climate === 'mixed') {
-    draft.clothingCounts.midlayers = 1;
     draft.items.push({
       id: 'clothing-packable-down',
       section: 'Clothing',
@@ -80,7 +89,6 @@ module.exports = function clothingRule(ctx, draft) {
   }
 
   if (derived.rainExpected || climate === 'mixed') {
-    draft.clothingCounts.outerwear += 1;
     draft.items.push({
       id: 'clothing-rain-shell',
       section: 'Clothing',
@@ -90,8 +98,14 @@ module.exports = function clothingRule(ctx, draft) {
     });
   }
 
-  if (climate === 'cold') {
-    draft.clothingCounts.outerwear += 1;
+  if (climate === 'cold' || climate === 'mixed' || derived.rainExpected === true) {
+    draft.items.push({
+      id: 'rec-buff',
+      section: 'Clothing',
+      label: 'Buff / neck gaiter',
+      count: 1,
+      packed: false,
+    });
   }
 
   // --- Gender-specific standalone extras ---

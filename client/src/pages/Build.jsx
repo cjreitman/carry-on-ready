@@ -892,8 +892,8 @@ export default function Build() {
                   value={s.climateOverride}
                   onCommit={(val) => updateStop(i, 'climateOverride', val)}
                   options={[
-                    { value: '', label: (() => { if (isIndefiniteTravel) return 'Auto (mixed)'; const inf = inferClimateFromStop(s); return inf ? `Auto (${inf.climate})` : 'Auto (based on destination + dates)'; })() },
-                    ...CLIMATE_OPTIONS.map((c) => ({ value: c, label: c })),
+                    { value: '', label: (() => { const cap = (v) => v.charAt(0).toUpperCase() + v.slice(1); if (isIndefiniteTravel) return 'Auto (Mixed)'; const inf = inferClimateFromStop(s); return inf ? `Auto (${cap(inf.climate)})` : 'Auto (based on destination + dates)'; })() },
+                    ...CLIMATE_OPTIONS.map((c) => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) })),
                   ]}
                   placeholder="Select climate"
                 />
@@ -922,7 +922,7 @@ export default function Build() {
                       )}
                       {!isIndefiniteTravel && !s.climateOverride && inf && (
                         <FieldHint>
-                          Auto: {inf.climate}{isAuto && inferredRain ? ', rain expected' : ''}
+                          Auto: {inf.climate.charAt(0).toUpperCase() + inf.climate.slice(1)}{isAuto && inferredRain ? ', rain expected' : ''}
                         </FieldHint>
                       )}
                     </>

@@ -10,6 +10,10 @@ module.exports = function techRule(ctx, draft) {
     { id: 'tech-earbuds', section: 'Tech', label: 'Earbuds / headphones', count: 1, packed: false }
   );
 
+  draft.items.push(
+    { id: 'rec-powerbank', section: 'Tech', label: 'Power bank (small)', count: 1, packed: false }
+  );
+
   if (workSetup === 'light') {
     draft.items.push(
       { id: 'tech-laptop', section: 'Tech', label: 'Laptop + charger', count: 1, packed: false }
