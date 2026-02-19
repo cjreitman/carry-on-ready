@@ -43,7 +43,7 @@ export default function About() {
         I built Carry-On Ready after spending years refining my own one-bag setup
         for indefinite travel, sometimes by choice, and sometimes because life
         pushed me into it. I wanted something that didn't just spit out a generic
-        packing checklist, but actually heuristically accounted for real-world constraints.
+        packing checklist, but heuristically accounted for real-world constraints.
       </Paragraph>
       <Paragraph>
         This app is the result of obsessively testing what fits into a 35L pack

@@ -17,7 +17,8 @@ const RULES_VERSION = '1.0.0';
 function getClothingLabels(gender) {
   if (gender === 'male') return {
     shoes: 'Shoes (wear bulkiest, pack the other)',
-    pants: 'Pants / shorts',
+    pants: 'Pants',
+    shorts: 'Shorts',
     shirts: 'T-shirts / tops',
     underwear: 'Underwear',
     socks: 'Socks',
@@ -26,7 +27,8 @@ function getClothingLabels(gender) {
   };
   if (gender === 'female') return {
     shoes: 'Shoes (wear bulkiest, pack the other)',
-    pants: 'Bottoms (pants, skirt, or leggings)',
+    pants: 'Pants / leggings',
+    shorts: 'Shorts / skirt',
     shirts: 'Tops (quick-dry preferred)',
     underwear: 'Underwear',
     socks: 'Socks',
@@ -36,7 +38,8 @@ function getClothingLabels(gender) {
   // non-binary / prefer-not-to-say
   return {
     shoes: 'Shoes (wear bulkiest, pack the other)',
-    pants: 'Bottoms',
+    pants: 'Pants',
+    shorts: 'Shorts',
     shirts: 'Tops (quick-dry preferred)',
     underwear: 'Underwear',
     socks: 'Socks',
@@ -119,6 +122,7 @@ function generate(rawInput) {
     const clothingItems = [
       { key: 'shoes', label: labels.shoes },
       { key: 'pants', label: labels.pants },
+      { key: 'shorts', label: labels.shorts },
       { key: 'shirts', label: labels.shirts },
       { key: 'underwear', label: labels.underwear },
       { key: 'socks', label: labels.socks },

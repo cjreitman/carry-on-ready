@@ -9,13 +9,20 @@ module.exports = function clothingRule(ctx, draft) {
 
   // --- Base counts ---
   let shoes = 2;
-  let pants = 2;
+  let pants, shorts;
   let shirts = 4;
   let underwear, socks;
 
-  // Hot-only: reduce pants (shoes stay at 2 so wearOne math works)
   if (climate === 'hot') {
+    pants = 0;
+    shorts = 2;
+  } else if (climate === 'cold') {
+    pants = 2;
+    shorts = 0;
+  } else {
+    // moderate / mixed
     pants = 1;
+    shorts = 1;
   }
 
   // Laundry adjustments
@@ -64,7 +71,7 @@ module.exports = function clothingRule(ctx, draft) {
   }
 
   // Store raw counts on draft for capping
-  draft.clothingCounts = { shoes, pants, shirts, underwear, socks, midlayers: 0, outerwear: 0 };
+  draft.clothingCounts = { shoes, pants, shorts, shirts, underwear, socks, midlayers: 0, outerwear: 0 };
 
   // --- Explicit layer items (midlayers/outerwear stay at 0 in clothingCounts) ---
 

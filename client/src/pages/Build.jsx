@@ -995,7 +995,7 @@ export default function Build() {
       bagLiters: bagSizeMode === 'liters' ? Number(bagLiters) : computedLiters,
       laundry,
       workSetup,
-      gender: gender || 'non-binary',
+      gender: gender || 'prefer-not-to-say',
       isIndefiniteTravel: isIndefiniteTravel || undefined,
       forcePassportRecommended: isIndefiniteTravel || undefined,
     };

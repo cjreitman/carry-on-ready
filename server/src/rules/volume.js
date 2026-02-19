@@ -133,6 +133,7 @@ const ITEM_VOLUME_MAP = {
   // Clothing (from caps in engine.js)
   'clothing-shoes': 'shoes_minimalist_pair',
   'clothing-pants': 'pants_technical_nylon',
+  'clothing-shorts': 'shorts_technical',
   'clothing-shirts': 'shirt_merino_tshirt',
   'clothing-underwear': 'underwear_merino',
   'clothing-socks': 'socks_merino',
