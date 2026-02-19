@@ -221,6 +221,34 @@ const CapacityHint = styled.div`
   margin-top: 3px;
 `;
 
+// --- ASCII cat meter ---
+
+const CAT_LOAF = ` /\\_/\\\n ( -.- )\n  > ^ < `;
+const CAT_ALERT = ` /\\_/\\\n ( o.o )\n  > ^ < `;
+const CAT_WIDE = ` /\\_/\\\n ( O.O )\n  > ^ < `;
+const CAT_PANIC = ` /\\_/\\\n ( 0_0 )\n />!!!<\\`;
+
+function getAsciiCat(pct) {
+  if (pct > 100) return CAT_PANIC;
+  if (pct >= 85) return CAT_WIDE;
+  if (pct >= 70) return CAT_ALERT;
+  return CAT_LOAF;
+}
+
+const CatPre = styled.pre`
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 10px;
+  line-height: 1.15;
+  margin: 0;
+  white-space: pre;
+  color: ${({ theme }) => theme.colors.textLight};
+  text-align: center;
+
+  @media print {
+    display: none;
+  }
+`;
+
 const WarningBox = styled.div`
   background: ${({ theme }) => theme.colors.warningBg};
   border-left: 3px solid ${({ theme }) => theme.colors.warning};
@@ -1047,6 +1075,9 @@ export default function Results() {
               </CapacityHint>
             )}
           </CapacityWrap>
+          <CatPre data-print-hide>
+            {getAsciiCat(percentUsed)}
+          </CatPre>
         </SidePanel>
       </PageWrap>
     </Page>
