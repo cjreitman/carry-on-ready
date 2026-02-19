@@ -12,17 +12,36 @@ module.exports = function clothingRule(ctx, draft) {
   let pants, shorts;
   let shirts = 4;
   let underwear, socks;
+  const isIndefinite = !!derived.isIndefiniteTravel;
 
-  if (climate === 'hot') {
-    pants = 0;
+  // Bottoms: climate-based split
+  if (isIndefinite || climate === 'mixed') {
+    pants = 2;
     shorts = 2;
+    draft.notes.push('Wear the bulkiest pair in transit.');
+  } else if (climate === 'hot') {
+    pants = 1;
+    shorts = 2;
+    draft.notes.push('Wear one pair in transit.');
   } else if (climate === 'cold') {
     pants = 2;
-    shorts = 0;
+    shorts = totalDays > 5 ? 1 : 0;
+    draft.notes.push('Wear the bulkiest pair in transit.');
   } else {
-    // moderate / mixed
-    pants = 1;
-    shorts = 1;
+    // moderate
+    pants = 2;
+    shorts = 2;
+    draft.notes.push('Wear the bulkiest pair in transit.');
+  }
+
+  // Short-trip bottom clamp (skip for indefinite)
+  if (!isIndefinite && totalDays <= 3) {
+    const totalBottoms = pants + shorts;
+    if (totalBottoms > 2) {
+      const ratio = pants / totalBottoms;
+      pants = Math.round(2 * ratio);
+      shorts = 2 - pants;
+    }
   }
 
   // Laundry adjustments
@@ -134,6 +153,11 @@ module.exports = function clothingRule(ctx, draft) {
       });
     }
   }
+
+  // --- Bottoms guidance ---
+  draft.notes.push(
+    'For longer trips, quick-dry fabrics allow one pair to be worn while another dries.'
+  );
 
   // --- Merino suggestions ---
   draft.notes.push(

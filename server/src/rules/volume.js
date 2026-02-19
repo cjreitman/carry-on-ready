@@ -17,10 +17,12 @@ const VOLUME_PROFILE = {
   socks_standard: 0.18,
 
   // Bottoms
+  pants_full: 1.10,
   pants_technical_nylon: 1.40,
   pants_chino_light: 1.70,
   pants_denim: 2.50,
   joggers_technical: 1.60,
+  shorts_light: 0.60,
   shorts_technical: 0.70,
   leggings_compressive: 0.90,
   skirt_light: 0.80,
@@ -132,8 +134,8 @@ const VOLUME_PROFILE = {
 const ITEM_VOLUME_MAP = {
   // Clothing (from caps in engine.js)
   'clothing-shoes': 'shoes_minimalist_pair',
-  'clothing-pants': 'pants_technical_nylon',
-  'clothing-shorts': 'shorts_technical',
+  'clothing-pants': 'pants_full',
+  'clothing-shorts': 'shorts_light',
   'clothing-shirts': 'shirt_merino_tshirt',
   'clothing-underwear': 'underwear_merino',
   'clothing-socks': 'socks_merino',
