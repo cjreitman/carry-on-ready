@@ -27,7 +27,7 @@ function getClothingLabels(gender) {
   };
   if (gender === 'female') return {
     shoes: 'Shoes (wear bulkiest, pack the other)',
-    pants: 'Pants / leggings',
+    pants: 'Pants',
     shorts: 'Shorts / skirt',
     shirts: 'Tops (quick-dry preferred)',
     underwear: 'Underwear',

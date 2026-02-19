@@ -219,19 +219,19 @@ const CapacityHint = styled.div`
   color: ${({ $state, theme }) =>
     $state === 'danger' ? theme.colors.warning : theme.colors.textLight};
   margin-top: 3px;
+  min-height: 1.2em;
+  visibility: ${({ $visible }) => ($visible ? 'visible' : 'hidden')};
 `;
 
 // --- ASCII cat meter ---
 
 const CAT_LOAF = ` /\\_/\\\n ( -.- )\n  > ^ < `;
-const CAT_ALERT = ` /\\_/\\\n ( o.o )\n  > ^ < `;
 const CAT_WIDE = ` /\\_/\\\n ( O.O )\n  > ^ < `;
 const CAT_PANIC = ` /\\_/\\\n ( 0_0 )\n />!!!<\\`;
 
 function getAsciiCat(pct) {
   if (pct > 100) return CAT_PANIC;
-  if (pct >= 85) return CAT_WIDE;
-  if (pct >= 70) return CAT_ALERT;
+  if (pct >= 90) return CAT_WIDE;
   return CAT_LOAF;
 }
 
@@ -1064,18 +1064,16 @@ export default function Results() {
             <CapacityTrack>
               <CapacityFill $pct={percentUsed} $state={capacityState} />
             </CapacityTrack>
-            {capacityState === 'danger' && (
-              <CapacityHint $state="danger">
-                Over by {overBy}L — reduce highlighted items.
-              </CapacityHint>
-            )}
-            {capacityState === 'warning' && (
-              <CapacityHint $state="warning">
-                Getting tight — consider trimming down.
-              </CapacityHint>
-            )}
+            <CapacityHint
+              $state={capacityState === 'danger' ? 'danger' : 'warning'}
+              $visible={capacityState === 'danger' || capacityState === 'warning'}
+            >
+              {capacityState === 'danger'
+                ? `Over by ${overBy}L — reduce highlighted items.`
+                : 'Getting tight — consider trimming down.'}
+            </CapacityHint>
           </CapacityWrap>
-          <CatPre data-print-hide>
+          <CatPre data-print-hide title="Kerry says hi">
             {getAsciiCat(percentUsed)}
           </CatPre>
         </SidePanel>

@@ -57,7 +57,7 @@ export default function About() {
       </Paragraph>
       <Paragraph />
       <Paragraph>
-        <CatArt>{`      |\\      _,,,---,,_
+        <CatArt title="Kerry says hi">{`      |\\      _,,,---,,_
 ZZZzz /,\`.-'\`'    -.  ;-;;,_
      |,4-  ) )-,_. ,\\ (  \`'-'
     '---''(_/--'  \`-'\\_)`}</CatArt>
