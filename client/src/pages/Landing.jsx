@@ -71,8 +71,7 @@ export default function Landing() {
 (@)<_____>__(_____)____/`}</CatArt>
       <Headline>Pack 30 Days Into a 35L Carry-On.</Headline>
       <Subhead>
-        Carry-On Ready generates an optimized, capacity-aware packing checklist based on your
-        trip length, climate, and work setup.
+        Know what fits before you pack.
       </Subhead>
       <CTA to="/build">Generate My Carry-On Plan</CTA>
       <HelperText>No account required. Takes 60 seconds.</HelperText>
