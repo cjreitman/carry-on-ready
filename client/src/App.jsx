@@ -1,5 +1,5 @@
 import { useState, useCallback, createContext, useContext } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from './styles/theme';
 import GlobalStyles from './styles/GlobalStyles';
@@ -20,13 +20,19 @@ function getInitialMode() {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored === 'light' || stored === 'dark') return stored;
   if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
-  return 'light';
+  return 'dark';
 }
 
 const ThemeModeContext = createContext({ mode: 'light', toggle: () => {} });
 
 export function useThemeMode() {
   return useContext(ThemeModeContext);
+}
+
+function BuildRoute() {
+  const location = useLocation();
+  const navNonce = location.state?.navNonce || '';
+  return <Build key={`${location.key}:${navNonce}`} />;
 }
 
 export default function App() {
@@ -50,7 +56,7 @@ export default function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Landing />} />
-              <Route path="/build" element={<Build />} />
+              <Route path="/build" element={<BuildRoute />} />
               <Route path="/results" element={<Results />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/about" element={<About />} />

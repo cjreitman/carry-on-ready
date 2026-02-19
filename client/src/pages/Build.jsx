@@ -818,25 +818,39 @@ const GENDER_OPTIONS = [
 
 export default function Build() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+
+  // Read saved inputs from sessionStorage (written by Results on generate)
+  const [initialInputs] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem('carryon:lastInputs');
+      if (raw) return JSON.parse(raw);
+    } catch { /* ignore */ }
+    return null;
+  });
+
+  const [step, setStep] = useState(initialInputs ? 2 : 1);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   // Step 1 state
-  const [citizenship, setCitizenship] = useState('');
-  const [isIndefiniteTravel, setIsIndefiniteTravel] = useState(false);
-  const [stops, setStops] = useState([{ ...EMPTY_STOP }]);
-  const [gender, setGender] = useState('');
+  const [citizenship, setCitizenship] = useState(initialInputs?.citizenship || '');
+  const [isIndefiniteTravel, setIsIndefiniteTravel] = useState(!!initialInputs?.isIndefiniteTravel);
+  const [stops, setStops] = useState(
+    initialInputs?.stops?.length
+      ? initialInputs.stops.map((s) => ({ ...EMPTY_STOP, ...s }))
+      : [{ ...EMPTY_STOP }]
+  );
+  const [gender, setGender] = useState(initialInputs?.gender || '');
 
   // Step 2 state
-  const [bagLiters, setBagLiters] = useState(35);
+  const [bagLiters, setBagLiters] = useState(initialInputs?.bagLiters ?? 35);
   const [bagSizeMode, setBagSizeMode] = useState('liters');
   const [bagDimL, setBagDimL] = useState('');
   const [bagDimW, setBagDimW] = useState('');
   const [bagDimH, setBagDimH] = useState('');
-  const [laundry, setLaundry] = useState('none');
-  const [workSetup, setWorkSetup] = useState('none');
+  const [laundry, setLaundry] = useState(initialInputs?.laundry || 'none');
+  const [workSetup, setWorkSetup] = useState(initialInputs?.workSetup || 'none');
 
   const computedLiters = useMemo(() => {
     if (bagSizeMode !== 'dimensions') return null;
@@ -1216,8 +1230,12 @@ export default function Build() {
                     <Input type="number" min={1} placeholder="Height" value={bagDimH} onChange={(e) => setBagDimH(e.target.value)} />
                   </Field>
                 </Row>
-                <DimHint>Estimated volume: {computedLiters != null ? `${computedLiters} L` : '\u2014'}</DimHint>
-                <DimHint style={{ fontSize: '0.7rem' }}>Based on external dimensions \u2014 usable packing space may be slightly less.</DimHint>
+                {computedLiters != null && (
+                  <>
+                    <DimHint>Estimated volume: {computedLiters} L</DimHint>
+                    <DimHint style={{ fontSize: '0.7rem' }}>Based on external dimensions &mdash; usable packing space may be slightly less.</DimHint>
+                  </>
+                )}
               </>
             )}
           </Field>

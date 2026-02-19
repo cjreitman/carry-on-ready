@@ -1,8 +1,10 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useThemeMode } from '../App';
 
 const Nav = styled.nav`
+  position: relative;
+  z-index: 50;
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
 `;
@@ -15,10 +17,14 @@ const NavInner = styled.div`
   justify-content: space-between;
 `;
 
-const Logo = styled(Link)`
+const Logo = styled.button`
   font-weight: 700;
   font-size: 1.1rem;
   color: ${({ theme }) => theme.colors.text};
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   &:hover { text-decoration: none; }
 `;
 
@@ -77,12 +83,13 @@ const CoffeeLink = styled.a`
 
 export default function Layout() {
   const { mode, toggle } = useThemeMode();
+  const navigate = useNavigate();
 
   return (
     <>
       <Nav>
         <NavInner>
-          <Logo to="/">Carry-On Ready</Logo>
+          <Logo onClick={() => { sessionStorage.removeItem('carryon:lastInputs'); navigate('/build', { state: { navNonce: Date.now() } }); }}>Carry-On Ready</Logo>
           <NavLinks>
             <Link to="/build">Build</Link>
             <Link to="/faq">FAQ</Link>

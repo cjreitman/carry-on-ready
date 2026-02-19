@@ -848,6 +848,12 @@ export default function Results() {
     if (window.umami) window.umami.track('Results Generated');
   }, [result]);
 
+  useEffect(() => {
+    if (inputs) {
+      sessionStorage.setItem('carryon:lastInputs', JSON.stringify(inputs));
+    }
+  }, [inputs]);
+
   if (!result) {
     return (
       <EmptyState>
