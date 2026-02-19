@@ -1,8 +1,15 @@
 import styled from 'styled-components';
 
+const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.lg};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`;
+
 const Title = styled.h1`
   font-size: 1.6rem;
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
+  margin: 0;
 `;
 
 const Entry = styled.div`
@@ -17,6 +24,17 @@ const Question = styled.h3`
 const Answer = styled.p`
   color: ${({ theme }) => theme.colors.textLight};
   line-height: 1.6;
+`;
+
+const CatArt = styled.pre`
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 8px;
+  line-height: 1.15;
+  margin: 0;
+  margin-left: auto;
+  white-space: pre;
+  color: ${({ theme }) => theme.colors.textLight};
+  user-select: none;
 `;
 
 const faqs = [
@@ -57,7 +75,19 @@ const faqs = [
 export default function FAQ() {
   return (
     <div>
-      <Title>Frequently Asked Questions</Title>
+      <TitleRow>
+        <Title>Frequently Asked Questions</Title>
+        <CatArt title="Kerry says hi">{` ,_     _
+ |\\_,-~/
+ / _  _ |    ,--.
+(  @  @ )   / ,-'
+ \\  _T_/-._( (
+ /         \`. \\
+|         _  \\ |
+ \\ \\ ,  /      |
+  || |-_\\__   /
+ ((_/\`(____,-'`}</CatArt>
+      </TitleRow>
       {faqs.map((f, i) => (
         <Entry key={i}>
           <Question>{f.q}</Question>

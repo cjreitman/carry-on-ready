@@ -846,6 +846,21 @@ export default function Build() {
   );
   const [gender, setGender] = useState(initialInputs?.gender || '');
 
+  // Indefinite mode: separate effective values (not tied to per-stop Travel dates values)
+  const [indefiniteClimateOverride, setIndefiniteClimateOverride] = useState(() => {
+    if (initialInputs?.isIndefiniteTravel) {
+      return initialInputs?.stops?.[0]?.climateOverride ?? 'mixed';
+    }
+    return 'mixed';
+  });
+  const [indefiniteRainExpected, setIndefiniteRainExpected] = useState(() => {
+    if (initialInputs?.isIndefiniteTravel) {
+      return initialInputs?.stops?.[0]?.rainExpected ?? true;
+    }
+    return true;
+  });
+  const [travelDatesSnapshot, setTravelDatesSnapshot] = useState(null);
+
   // Step 2 state
   const [bagLiters, setBagLiters] = useState(initialInputs?.bagLiters ?? 35);
   const [bagSizeMode, setBagSizeMode] = useState('liters');
@@ -985,13 +1000,20 @@ export default function Build() {
     setSubmitting(true);
 
     const payload = {
-      citizenship: citizenship.trim(),
-      stops: stops.map((s) => ({
-        countryOrRegion: s.countryOrRegion.trim(),
-        ...(isIndefiniteTravel ? {} : { startDate: s.startDate, endDate: s.endDate }),
-        climateOverride: s.climateOverride || null,
-        rainExpected: s.rainExpected,
-      })),
+      citizenship: isIndefiniteTravel ? '' : citizenship.trim(),
+      stops: isIndefiniteTravel
+        ? [{
+            countryOrRegion: '',
+            climateOverride: indefiniteClimateOverride || 'mixed',
+            rainExpected: indefiniteRainExpected,
+          }]
+        : stops.map((s) => ({
+            countryOrRegion: s.countryOrRegion.trim(),
+            startDate: s.startDate,
+            endDate: s.endDate,
+            climateOverride: s.climateOverride || null,
+            rainExpected: s.rainExpected,
+          })),
       bagLiters: bagSizeMode === 'liters' ? Number(bagLiters) : computedLiters,
       laundry,
       workSetup,
@@ -1026,18 +1048,29 @@ export default function Build() {
         <Card>
           <CardLabel>Trip timing</CardLabel>
           <ModeToggle>
-            <ModeBtn $active={tripTimingMode === 'dates'} onClick={() => setTripTimingMode('dates')}>
+            <ModeBtn $active={tripTimingMode === 'dates'} onClick={() => {
+              if (tripTimingMode !== 'dates') {
+                // Restore per-stop climate/rain from snapshot
+                setStops(prev => prev.map((s, i) => {
+                  const snap = travelDatesSnapshot?.[i];
+                  return {
+                    ...s,
+                    climateOverride: snap ? snap.climateOverride : '',
+                    rainExpected: snap ? snap.rainExpected : false,
+                  };
+                }));
+              }
+              setTripTimingMode('dates');
+            }}>
               Travel dates
             </ModeBtn>
             <ModeBtn $active={tripTimingMode === 'indefinite'} onClick={() => {
               if (tripTimingMode !== 'indefinite') {
-                setStops([{
-                  countryOrRegion: '',
-                  startDate: '',
-                  endDate: '',
-                  climateOverride: 'mixed',
-                  rainExpected: true,
-                }]);
+                // Snapshot per-stop climate/rain before entering Indefinite
+                setTravelDatesSnapshot(stops.map(s => ({
+                  climateOverride: s.climateOverride,
+                  rainExpected: s.rainExpected,
+                })));
               }
               setTripTimingMode('indefinite');
             }}>
@@ -1064,99 +1097,121 @@ export default function Build() {
         </Card>
         )}
 
-        {stops.map((s, i) => (
-          <Card key={i}>
-            {!isIndefiniteTravel && (
-            <StopHeader>
-              <StopLabel>Stop {i + 1}</StopLabel>
-              {stops.length > 1 && (
-                <RemoveBtn onClick={() => removeStop(i)}>Remove</RemoveBtn>
-              )}
-            </StopHeader>
-            )}
-            {!isIndefiniteTravel && (
-            <Row>
-              <Field $flex={2}>
-                Country / Region
-                <CountryAutocomplete
-                  value={s.countryOrRegion}
-                  onCommit={(val) => { updateStop(i, 'countryOrRegion', val); clearFieldError(`stop-${i}-country`); }}
-                  placeholder="e.g. France"
-                  inputId={`field-stop-${i}-country`}
-                />
-                {fieldErrors[`stop-${i}-country`] && <InlineError>{fieldErrors[`stop-${i}-country`]}</InlineError>}
-              </Field>
-            </Row>
-            )}
-            {!isIndefiniteTravel && (
-              <DateRangeFields
-                startDate={s.startDate}
-                endDate={s.endDate}
-                onChangeStart={(val) => {
-                  updateStop(i, 'startDate', val);
-                  clearFieldError(`stop-${i}-startDate`);
-                  clearFieldError(`stop-${i}-endDate`);
-                }}
-                onChangeEnd={(val) => {
-                  updateStop(i, 'endDate', val);
-                  clearFieldError(`stop-${i}-startDate`);
-                  clearFieldError(`stop-${i}-endDate`);
-                }}
-                startId={`field-stop-${i}-startDate`}
-                endId={`field-stop-${i}-endDate`}
-                startError={fieldErrors[`stop-${i}-startDate`]}
-                endError={fieldErrors[`stop-${i}-endDate`]}
-              />
-            )}
+        {isIndefiniteTravel ? (
+          <Card>
             <Row>
               <Field>
                 Climate override
                 <DropdownSelect
-                  value={s.climateOverride}
-                  onCommit={(val) => updateStop(i, 'climateOverride', val)}
+                  value={indefiniteClimateOverride}
+                  onCommit={setIndefiniteClimateOverride}
                   options={[
-                    { value: '', label: (() => { const cap = (v) => v.charAt(0).toUpperCase() + v.slice(1); if (isIndefiniteTravel) return 'Auto (Mixed)'; const inf = inferClimateFromStop(s); return inf ? `Auto (${cap(inf.climate)})` : 'Auto (based on destination + dates)'; })() },
+                    { value: '', label: 'Auto (Mixed)' },
                     ...CLIMATE_OPTIONS.map((c) => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) })),
                   ]}
                   placeholder="Select climate"
                 />
-                {(() => {
-                  const inf = inferClimateFromStop(s);
-                  const inferredRain = inf ? inf.rainExpected : false;
-                  const isAuto = s.rainExpected === null;
-                  const effectiveChecked = s.rainExpected === true || (isAuto && inferredRain);
-
-                  return (
-                    <>
-                      <CheckboxRow>
-                        <CheckboxInput
-                          type="checkbox"
-                          checked={effectiveChecked}
-                          onChange={() => {
-                            updateStop(i, 'rainExpected', effectiveChecked ? false : true);
-                          }}
-                        />
-                        Rain expected
-                      </CheckboxRow>
-                      {!isIndefiniteTravel && s.rainExpected !== null && (
-                        <ResetAutoBtn type="button" onClick={() => updateStop(i, 'rainExpected', null)}>
-                          Reset to Auto
-                        </ResetAutoBtn>
-                      )}
-                      {!isIndefiniteTravel && !s.climateOverride && inf && (
-                        <FieldHint>
-                          Auto: {inf.climate.charAt(0).toUpperCase() + inf.climate.slice(1)}{isAuto && inferredRain ? ', rain expected' : ''}
-                        </FieldHint>
-                      )}
-                    </>
-                  );
-                })()}
+                <CheckboxRow>
+                  <CheckboxInput
+                    type="checkbox"
+                    checked={indefiniteRainExpected}
+                    onChange={() => setIndefiniteRainExpected(!indefiniteRainExpected)}
+                  />
+                  Rain expected
+                </CheckboxRow>
               </Field>
             </Row>
           </Card>
-        ))}
+        ) : (
+          <>
+            {stops.map((s, i) => (
+              <Card key={i}>
+                <StopHeader>
+                  <StopLabel>Stop {i + 1}</StopLabel>
+                  {stops.length > 1 && (
+                    <RemoveBtn onClick={() => removeStop(i)}>Remove</RemoveBtn>
+                  )}
+                </StopHeader>
+                <Row>
+                  <Field $flex={2}>
+                    Country / Region
+                    <CountryAutocomplete
+                      value={s.countryOrRegion}
+                      onCommit={(val) => { updateStop(i, 'countryOrRegion', val); clearFieldError(`stop-${i}-country`); }}
+                      placeholder="e.g. France"
+                      inputId={`field-stop-${i}-country`}
+                    />
+                    {fieldErrors[`stop-${i}-country`] && <InlineError>{fieldErrors[`stop-${i}-country`]}</InlineError>}
+                  </Field>
+                </Row>
+                <DateRangeFields
+                  startDate={s.startDate}
+                  endDate={s.endDate}
+                  onChangeStart={(val) => {
+                    updateStop(i, 'startDate', val);
+                    clearFieldError(`stop-${i}-startDate`);
+                    clearFieldError(`stop-${i}-endDate`);
+                  }}
+                  onChangeEnd={(val) => {
+                    updateStop(i, 'endDate', val);
+                    clearFieldError(`stop-${i}-startDate`);
+                    clearFieldError(`stop-${i}-endDate`);
+                  }}
+                  startId={`field-stop-${i}-startDate`}
+                  endId={`field-stop-${i}-endDate`}
+                  startError={fieldErrors[`stop-${i}-startDate`]}
+                  endError={fieldErrors[`stop-${i}-endDate`]}
+                />
+                <Row>
+                  <Field>
+                    Climate override
+                    <DropdownSelect
+                      value={s.climateOverride}
+                      onCommit={(val) => updateStop(i, 'climateOverride', val)}
+                      options={[
+                        { value: '', label: (() => { const cap = (v) => v.charAt(0).toUpperCase() + v.slice(1); const inf = inferClimateFromStop(s); return inf ? `Auto (${cap(inf.climate)})` : 'Auto (based on destination + dates)'; })() },
+                        ...CLIMATE_OPTIONS.map((c) => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) })),
+                      ]}
+                      placeholder="Select climate"
+                    />
+                    {(() => {
+                      const inf = inferClimateFromStop(s);
+                      const inferredRain = inf ? inf.rainExpected : false;
+                      const isAuto = s.rainExpected === null;
+                      const effectiveChecked = s.rainExpected === true || (isAuto && inferredRain);
 
-        {!isIndefiniteTravel && <TextBtn onClick={addStop}>+ Add another stop</TextBtn>}
+                      return (
+                        <>
+                          <CheckboxRow>
+                            <CheckboxInput
+                              type="checkbox"
+                              checked={effectiveChecked}
+                              onChange={() => {
+                                updateStop(i, 'rainExpected', effectiveChecked ? false : true);
+                              }}
+                            />
+                            Rain expected
+                          </CheckboxRow>
+                          {s.rainExpected !== null && (
+                            <ResetAutoBtn type="button" onClick={() => updateStop(i, 'rainExpected', null)}>
+                              Reset to Auto
+                            </ResetAutoBtn>
+                          )}
+                          {!s.climateOverride && inf && (
+                            <FieldHint>
+                              Auto: {inf.climate.charAt(0).toUpperCase() + inf.climate.slice(1)}{isAuto && inferredRain ? ', rain expected' : ''}
+                            </FieldHint>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </Field>
+                </Row>
+              </Card>
+            ))}
+            <TextBtn onClick={addStop}>+ Add another stop</TextBtn>
+          </>
+        )}
 
         <Card style={{ marginTop: '16px' }}>
           <CardLabel>Gender</CardLabel>

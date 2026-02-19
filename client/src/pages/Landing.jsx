@@ -50,9 +50,25 @@ const Tagline = styled.p`
   font-style: italic;
 `;
 
+const CatArt = styled.pre`
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.2;
+  margin: 0 auto ${({ theme }) => theme.spacing.lg};
+  white-space: pre;
+  color: ${({ theme }) => theme.colors.textLight};
+  user-select: none;
+  display: inline-block;
+  text-align: left;
+`;
+
 export default function Landing() {
   return (
     <Hero>
+      <CatArt title="Kerry says hi">{`    /\\_/\\           ___
+   = o_o =_______    \\ \\
+    __^      __(  \\.__) )
+(@)<_____>__(_____)____/`}</CatArt>
       <Headline>Pack 30 Days Into a 35L Carry-On.</Headline>
       <Subhead>
         Carry-On Ready generates an optimized, capacity-aware packing checklist based on your
