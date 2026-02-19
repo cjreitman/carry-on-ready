@@ -55,6 +55,7 @@ export default function About() {
         your setup, you can support the project{' '}
         <a href="https://buymeacoffee.com/cjreitman" target="_blank" rel="noopener noreferrer">here</a>.
       </Paragraph>
+      <Paragraph />
       <Paragraph>
         <CatArt>{`      |\\      _,,,---,,_
 ZZZzz /,\`.-'\`'    -.  ;-;;,_

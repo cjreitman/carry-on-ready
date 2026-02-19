@@ -930,10 +930,6 @@ export default function Build() {
       }
     }
 
-    if (!gender) {
-      addError('gender', 'Please select a gender.');
-    }
-
     return { errors, firstKey };
   }
 
@@ -999,7 +995,7 @@ export default function Build() {
       bagLiters: bagSizeMode === 'liters' ? Number(bagLiters) : computedLiters,
       laundry,
       workSetup,
-      gender,
+      gender: gender || 'non-binary',
       isIndefiniteTravel: isIndefiniteTravel || undefined,
       forcePassportRecommended: isIndefiniteTravel || undefined,
     };
