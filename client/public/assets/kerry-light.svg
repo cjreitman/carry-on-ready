@@ -4,6 +4,6 @@
     font-size="21" fill="#111" stroke="#111" stroke-width="1.2" paint-order="stroke fill">
     <tspan x="50%" dx="1">/\_/\</tspan>
     <tspan x="50%" dx="1" dy="25">( o.o )</tspan>
-    <tspan x="50%" dx="1" dy="25">&gt; ^ &lt;</tspan>
+    <tspan x="50%" dx="-5" dy="25">&gt; ^ &lt;</tspan>
   </text>
 </svg>
