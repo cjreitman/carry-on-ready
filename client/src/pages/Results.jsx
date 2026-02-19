@@ -1016,9 +1016,11 @@ export default function Results() {
               />
               L
             </SummaryItem>
-            <SummaryItem>
-              Trip: <strong>{derived.totalDays} days</strong>
-            </SummaryItem>
+            {!inputs?.isIndefiniteTravel && (
+              <SummaryItem>
+                Trip: <strong>{derived.totalDays} days</strong>
+              </SummaryItem>
+            )}
           </SummaryBar>
           <SummaryNote>Adjust bag size to update capacity.</SummaryNote>
 
