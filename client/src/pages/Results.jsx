@@ -486,7 +486,6 @@ const NoteFooter = styled.p`
 
 const BackLink = styled(Link)`
   display: inline-block;
-  margin-top: ${({ theme }) => theme.spacing.lg};
   font-size: 0.95rem;
 `;
 
@@ -859,7 +858,7 @@ export default function Results() {
       <EmptyState>
         <EmptyTitle>No checklist to show</EmptyTitle>
         <p>Build your itinerary first to generate a packing plan.</p>
-        <BackLink to="/build">Go to Build</BackLink>
+        <BackLink to="/build" style={{ marginTop: '16px' }}>Go to Build</BackLink>
       </EmptyState>
     );
   }
@@ -899,6 +898,7 @@ export default function Results() {
 
   return (
     <Page>
+      <BackLink to="/build" data-print-hide>&larr; Back to Build</BackLink>
       <Header>
         <Title>Your Packing Checklist</Title>
         <ExportBar data-print-hide>
@@ -996,7 +996,7 @@ export default function Results() {
             </Section>
           )}
 
-          <BackLink to="/build" data-print-hide>&larr; Back to Build</BackLink>
+          <BackLink to="/build" style={{ marginTop: '24px' }} data-print-hide>&larr; Back to Build</BackLink>
         </MainContent>
 
         {/* --- Side panel (right, sticky) --- */}
