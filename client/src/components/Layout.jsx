@@ -89,7 +89,7 @@ export default function Layout() {
     <>
       <Nav>
         <NavInner>
-          <Logo onClick={() => { sessionStorage.removeItem('carryon:lastInputs'); navigate('/build', { state: { navNonce: Date.now() } }); }}>Carry-On Ready</Logo>
+          <Logo onClick={() => { sessionStorage.removeItem('carryon:lastInputs'); navigate('/'); }}>Carry-On Ready</Logo>
           <NavLinks>
             <Link to="/build">Build</Link>
             <Link to="/faq">FAQ</Link>

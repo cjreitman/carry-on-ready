@@ -835,7 +835,10 @@ export default function Build() {
 
   // Step 1 state
   const [citizenship, setCitizenship] = useState(initialInputs?.citizenship || '');
-  const [isIndefiniteTravel, setIsIndefiniteTravel] = useState(!!initialInputs?.isIndefiniteTravel);
+  const [tripTimingMode, setTripTimingMode] = useState(
+    initialInputs?.isIndefiniteTravel ? 'indefinite' : 'dates'
+  );
+  const isIndefiniteTravel = tripTimingMode === 'indefinite';
   const [stops, setStops] = useState(
     initialInputs?.stops?.length
       ? initialInputs.stops.map((s) => ({ ...EMPTY_STOP, ...s }))
@@ -1024,39 +1027,31 @@ export default function Build() {
       <Page>
         <StepTitle>Step 1: Your Trip</StepTitle>
         <StepSub>Add one or more stops to your itinerary.</StepSub>
-        <PrefillBlurb>
-          We prefill climate and rain expectations based on your destination and
-          travel dates. This is a best-guess estimate, but you can override it at
-          any time.
-        </PrefillBlurb>
-
         <Card>
-          <CheckboxRow>
-            <CheckboxInput
-              type="checkbox"
-              checked={isIndefiniteTravel}
-              onChange={() => {
-                setIsIndefiniteTravel((prev) => {
-                  const next = !prev;
-                  if (next) {
-                    // Collapse to one stop with indefinite defaults
-                    setStops([{
-                      countryOrRegion: '',
-                      startDate: '',
-                      endDate: '',
-                      climateOverride: 'mixed',
-                      rainExpected: true,
-                    }]);
-                  }
-                  return next;
-                });
-              }}
-            />
-            Indefinite / open-ended travel
-          </CheckboxRow>
+          <CardLabel>Trip timing</CardLabel>
+          <ModeToggle>
+            <ModeBtn $active={tripTimingMode === 'dates'} onClick={() => setTripTimingMode('dates')}>
+              Travel dates
+            </ModeBtn>
+            <ModeBtn $active={tripTimingMode === 'indefinite'} onClick={() => {
+              if (tripTimingMode !== 'indefinite') {
+                setStops([{
+                  countryOrRegion: '',
+                  startDate: '',
+                  endDate: '',
+                  climateOverride: 'mixed',
+                  rainExpected: true,
+                }]);
+              }
+              setTripTimingMode('indefinite');
+            }}>
+              Indefinite / open-ended
+            </ModeBtn>
+          </ModeToggle>
           <FieldHint>
-            When enabled, we assume mixed climates and possible rain, and
-            we'll recommend versatile layering essentials. We'll also recommend bringing a passport by default.
+            {tripTimingMode === 'dates'
+              ? "We\u2019ll prefill climate and rain using destination + dates."
+              : "We\u2019ll assume a broad range of conditions. You can still adjust climate and rain."}
           </FieldHint>
         </Card>
 

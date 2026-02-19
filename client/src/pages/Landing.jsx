@@ -9,7 +9,7 @@ const Hero = styled.section`
 const Headline = styled.h1`
   font-size: 2.2rem;
   line-height: 1.25;
-  margin-bottom: ${({ theme }) => theme.spacing.md};
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
   max-width: 700px;
   margin-left: auto;
   margin-right: auto;
@@ -19,14 +19,8 @@ const Subhead = styled.p`
   font-size: 1.15rem;
   color: ${({ theme }) => theme.colors.textLight};
   max-width: 600px;
-  margin: 0 auto ${({ theme }) => theme.spacing.sm};
-  line-height: 1.6;
-`;
-
-const Supporting = styled.p`
-  font-size: 0.95rem;
-  color: ${({ theme }) => theme.colors.textLight};
   margin: 0 auto ${({ theme }) => theme.spacing.xl};
+  line-height: 1.6;
 `;
 
 const CTA = styled(Link)`
@@ -44,7 +38,7 @@ const CTA = styled(Link)`
 `;
 
 const HelperText = styled.p`
-  margin-top: ${({ theme }) => theme.spacing.md};
+  margin-top: ${({ theme }) => theme.spacing.lg};
   font-size: 0.85rem;
   color: ${({ theme }) => theme.colors.textLight};
 `;
@@ -59,9 +53,9 @@ const Tagline = styled.p`
 export default function Landing() {
   return (
     <Hero>
-      <Headline>Pack 30 Days Into a 35L Carry-On Without Guessing.</Headline>
+      <Headline>Pack 30 Days Into a 35L Carry-On.</Headline>
       <Subhead>
-        Carry-On Ready generates a capacity-aware packing checklist based on your
+        Carry-On Ready generates an optimized, capacity-aware packing checklist based on your
         trip length, climate, and work setup.
       </Subhead>
       <CTA to="/build">Generate My Carry-On Plan</CTA>
