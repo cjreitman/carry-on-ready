@@ -9,7 +9,7 @@ const Hero = styled.section`
 const Headline = styled.h1`
   font-size: 2.2rem;
   line-height: 1.25;
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
   max-width: 700px;
   margin-left: auto;
   margin-right: auto;
@@ -35,6 +35,7 @@ const CTA = styled(Link)`
     background: ${({ theme }) => theme.colors.primaryHover};
     text-decoration: none;
   }
+  margin-bottom: ${({ theme }) => theme.spacing.xl};
 `;
 
 const HelperText = styled.p`
@@ -48,6 +49,34 @@ const Tagline = styled.p`
   font-size: 0.95rem;
   color: ${({ theme }) => theme.colors.textLight};
   font-style: italic;
+`;
+
+const HowSection = styled.section`
+  max-width: 440px;
+  margin: ${({ theme }) => theme.spacing.xxl} auto 0;
+`;
+
+const HowHeading = styled.h2`
+  font-size: 1.1rem;
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+  text-align: center;
+`;
+
+const HowList = styled.ol`
+  margin: 0;
+  padding-left: 1.4em;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: ${({ theme }) => theme.colors.text};
+  text-align: left;
+  padding-left: 85px;
+`;
+
+const HowInsight = styled.p`
+  margin-top: ${({ theme }) => theme.spacing.md};
+  font-size: 0.82rem;
+  color: ${({ theme }) => theme.colors.textLight};
+  text-align: center;
 `;
 
 const CatArt = styled.pre`
@@ -74,8 +103,15 @@ export default function Landing() {
         Know what fits before you pack.
       </Subhead>
       <CTA to="/build">Generate My Carry-On Plan</CTA>
-      <HelperText>No account required. Takes 60 seconds.</HelperText>
-      <Tagline>Keep calm and Carry-On.</Tagline>
+      <Subhead>No account required. Takes 60 seconds.</Subhead>
+      <HowSection>
+        <HowHeading>How It Works</HowHeading>
+        <HowList>
+          <li>Enter your trip details and bag size.</li>
+          <li>We model realistic item volumes in liters.</li>
+          <li>See what actually fits before you pack.</li>
+        </HowList>
+      </HowSection>
     </Hero>
   );
 }
