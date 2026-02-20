@@ -46,6 +46,32 @@ const BASELINE_ITEMS = [
     genders: ['all'],
     climates: ['all'],
   },
+  {
+    id: 'tech-cables',
+    section: 'Tech',
+    label: 'Charging cables',
+    tier: 'essential',
+    genders: ['all'],
+    climates: ['all'],
+  },
+  {
+    id: 'health-deodorant',
+    section: 'Health',
+    label: 'Deodorant',
+    tier: 'essential',
+    genders: ['all'],
+    climates: ['all'],
+  },
+  {
+    id: 'tech-sim',
+    section: 'Tech',
+    label: 'SIM / eSIM',
+    tier: 'essential',
+    genders: ['all'],
+    climates: ['all'],
+    // Only include when traveling internationally (engine checks this)
+    condition: (derived) => !!derived.passportRecommended,
+  },
 ];
 
 module.exports = { BASELINE_ITEMS };

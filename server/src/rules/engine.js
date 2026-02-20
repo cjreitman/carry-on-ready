@@ -74,6 +74,9 @@ const OPTIONAL_ADDONS = [
   { id: 'opt-electrolytes', label: 'Electrolyte packets', tooltip: 'Useful for heat, long travel days, or heavy activity.' },
   { id: 'rec-clothesline', label: 'Packable clothesline', tooltip: 'Handy for sink washes and drying items overnight.' },
   { id: 'opt-headlamp', label: 'Compact headlamp (rechargeable)', tooltip: 'Useful for power outages, night arrivals, and hiking.' },
+  { id: 'opt-cologne', label: 'Travel cologne / fragrance', tooltip: '~0.2L. Solid or decanted travel size.' },
+  { id: 'opt-sanitizer', label: 'Hand sanitizer', tooltip: '~0.1L. Useful when soap and water are unavailable.' },
+  { id: 'opt-tissues', label: 'Travel tissues', tooltip: '~0.1L. Compact pack for transit and unexpected situations.' },
 ];
 
 const CARRYON_PRINCIPLES = [
@@ -193,6 +196,7 @@ function generate(rawInput) {
     if (!baseline.genders.includes('all') && !baseline.genders.includes(derived.gender)) continue;
     if (!baseline.climates.includes('all') && !baseline.climates.includes(derived.climate)) continue;
     if (baseline.workSetup && !baseline.workSetup.includes(parsed.workSetup)) continue;
+    if (baseline.condition && !baseline.condition(derived, parsed)) continue;
 
     checklist.push(attachVolume({
       id: baseline.id,

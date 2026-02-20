@@ -102,6 +102,12 @@ const VOLUME_PROFILE = {
   detergent_sheets: 0.10,
   sunscreen: 0.15,
   rehydration_salts: 0.10,
+  deodorant_travel: 0.20,
+  charging_cables: 0.10,
+  sim_esim: 0,
+  cologne_travel: 0.20,
+  hand_sanitizer: 0.10,
+  tissues_travel: 0.10,
 
   // New recommended items
   sleep_kit: 0.10,
@@ -226,6 +232,16 @@ const ITEM_VOLUME_MAP = {
   'opt-contact-lenses': 'contact_lenses_set',
   'opt-contact-case': 'contact_lens_case',
   'opt-contact-solution': 'contact_lens_solution_small',
+
+  // New baseline items
+  'tech-cables': 'charging_cables',
+  'health-deodorant': 'deodorant_travel',
+  'tech-sim': 'sim_esim',
+
+  // New optional add-ons
+  'opt-cologne': 'cologne_travel',
+  'opt-sanitizer': 'hand_sanitizer',
+  'opt-tissues': 'tissues_travel',
 
   // Contextual optional add-ons
   'opt-puffy-jacket': 'jacket_down_packable',
