@@ -64,12 +64,10 @@ const HowHeading = styled.h2`
 
 const HowList = styled.ol`
   margin: 0;
-  padding-left: 1.4em;
   font-size: 0.95rem;
   line-height: 1.7;
   color: ${({ theme }) => theme.colors.text};
-  text-align: left;
-  padding-left: 85px;
+  text-align: center;
 `;
 
 const HowInsight = styled.p`
@@ -107,9 +105,9 @@ export default function Landing() {
       <HowSection>
         <HowHeading>How It Works</HowHeading>
         <HowList>
-          <li>Enter your trip details and bag size.</li>
-          <li>We model realistic item volumes in liters.</li>
-          <li>See what actually fits before you pack.</li>
+          <div>Enter your trip details and bag size.</div>
+          <div>We model realistic item volumes in liters.</div>
+          <div>See what actually fits before you pack.</div>
         </HowList>
       </HowSection>
     </Hero>
